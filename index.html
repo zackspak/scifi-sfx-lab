@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sci-Fi SFX Lab</title>
+<meta name="description" content="Sci-fi, retro, movement (whoosh, jump, dash) and impact (metal, dirt, leaves, hollow, player hit) game sound-effect generator and editor with WAV and batch ZIP export. Works offline.">
+<meta name="theme-color" content="#05070d">
+<meta name="color-scheme" content="dark">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sci-Fi SFX">
+<meta name="format-detection" content="telephone=no">
+<style>
+:root{
+  --bg:#05070d; --panel:#0b1220; --panel2:#111c30; --line:#1d3350; --text:#e3f4ff; --muted:#7f9bb8;
+  --accent:#28f0ff; --accent-ink:#00161a; --mag:#ff3cc8; --ok:#4dffa6; --warn:#ffc94d; --imp:#ff8a3d; --tap:48px; --radius:14px;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;color:var(--text);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  background:var(--bg) radial-gradient(ellipse at 50% -10%,#0d2a44 0%,transparent 60%) no-repeat;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);min-height:100vh;min-height:100dvh;overscroll-behavior-y:none}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.35;
+  background-image:linear-gradient(#0f2238 1px,transparent 1px),linear-gradient(90deg,#0f2238 1px,transparent 1px);background-size:28px 28px}
+button,select,input{font:inherit;color:inherit}
+button{touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px 4px;max-width:1180px;margin:0 auto}
+header .t{flex:1;min-width:0}
+header h1{font:800 19px/1.1 var(--mono);margin:0;letter-spacing:1.5px;text-transform:uppercase;text-shadow:0 0 12px rgba(40,240,255,.45)}
+header h1 span{color:var(--accent)}
+header small{display:block;color:var(--muted);font:12px var(--mono);letter-spacing:1px;margin-top:3px}
+.iconbtn{min-width:var(--tap);min-height:var(--tap);border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:16px;padding:0 12px}
+main{padding:0 12px calc(108px + env(safe-area-inset-bottom));max-width:1180px;margin:0 auto}
+.card,details.sec{background:linear-gradient(180deg,rgba(17,28,48,.92),rgba(11,18,32,.92));border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;box-shadow:inset 0 1px 0 rgba(40,240,255,.06)}
+.card{padding:12px}
+.card h2{font:700 12px var(--mono);text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin:0 0 10px;opacity:.85}
+.card h2+.grid{margin-bottom:12px}
+.card h2.mag{color:var(--mag)}
+.card h2.ok{color:var(--ok)}
+.card h2.imp{color:var(--imp)}
+#scope{display:block;width:100%;height:110px;border-radius:10px;background:#02050a;border:1px solid #0f2238;touch-action:manipulation}
+.meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font:13px var(--mono);margin-top:6px}
+.meta #name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.btn{min-height:var(--tap);border-radius:12px;border:1px solid var(--line);background:var(--panel2);padding:8px 6px;font-weight:650;font-size:15px}
+.btn:active,.seg button:active{transform:scale(.97);border-color:var(--accent);box-shadow:0 0 12px rgba(40,240,255,.35)}
+.btn.mag{border-color:#5a1f52;background:#1d0f24}
+.btn.wide{grid-column:span 3}
+.btn.cy{border-color:#14606a;background:#06262b;color:var(--accent)}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.seg button{min-height:var(--tap);border-radius:12px;border:1px solid var(--line);background:var(--panel2);font-weight:650;font-size:15px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 14px rgba(40,240,255,.4)}
+details.sec{overflow:hidden}
+details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;gap:10px;padding:0 14px;font:700 15px var(--mono);letter-spacing:.5px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:"";margin-left:auto;width:10px;height:10px;border-right:2.5px solid var(--accent);border-bottom:2.5px solid var(--accent);transform:rotate(45deg);transition:transform .15s;flex:none}
+details.sec[open]>summary::after{transform:rotate(-135deg)}
+details.sec>summary small{color:var(--muted);font:500 12px var(--mono)}
+details.sec>summary .fxon{width:8px;height:8px;border-radius:50%;background:var(--mag);box-shadow:0 0 8px var(--mag);display:none}
+details.sec.active>summary .fxon{display:inline-block}
+.sec .body{padding:0 14px 10px}
+.row{padding:6px 0 4px;border-top:1px solid #13243a}
+.row:first-child{border-top:0}
+.row .top{display:flex;align-items:center;gap:8px}
+.row label{flex:1;font-size:15px}
+.row output{font:13px var(--mono);color:var(--accent);min-width:64px;text-align:right}
+.row .reset{min-width:44px;min-height:44px;border:0;background:transparent;color:var(--muted);font-size:18px;border-radius:10px}
+.row .reset:active{background:var(--panel2)}
+.row.dim{opacity:.4}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;margin:0;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(90deg,var(--accent) var(--p,50%),#1a2d47 var(--p,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-12px;border-radius:50%;background:#02050a;border:3px solid var(--accent);box-shadow:0 0 10px rgba(40,240,255,.55)}
+input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:#1a2d47}
+input[type=range]::-moz-range-progress{height:6px;border-radius:6px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#02050a;border:3px solid var(--accent)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.opts .full{grid-column:1/-1}
+select{min-height:var(--tap);border-radius:12px;border:1px solid var(--line);background:var(--panel2);padding:0 10px;font-size:16px;width:100%}
+.toggle{display:flex!important;align-items:center;gap:12px;min-height:var(--tap);font-size:15px!important;color:var(--text)!important;flex-direction:row!important}
+.toggle input{width:26px;height:26px;accent-color:var(--accent);flex:none}
+.dl{display:none;margin-top:10px;padding:12px;border-radius:12px;background:#062a1c;border:1px solid #1c6b4a;color:var(--ok);text-decoration:none;font-weight:600;min-height:var(--tap);word-break:break-all;width:100%;text-align:left;font-size:15px}
+.dl.show{display:block}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.note{font-size:13px;color:var(--muted);margin:6px 0 0}
+.banner{display:none;align-items:flex-start;gap:10px;background:#0d1a2e;border:1px solid #234a73;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px}
+.banner.show{display:flex}
+.banner p{margin:0;flex:1}
+.banner button{min-width:44px;min-height:44px;border:0;background:transparent;font-size:18px;color:var(--muted)}
+/* Library */
+.libtools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.tabs button{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-weight:650}
+.tabs button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.lib-row{display:flex;align-items:center;gap:2px;border-top:1px solid #13243a;padding:4px 0}
+.lib-row.cur .lib-name b{color:var(--accent)}
+.lib-row button{min-width:44px;min-height:48px;border:0;background:transparent;border-radius:10px;font-size:17px;color:var(--muted);flex:none}
+.lib-row button:active{background:var(--panel2)}
+.lib-row .star[aria-pressed="true"]{color:var(--warn)}
+.lib-row .lib-name{flex:1;min-width:0;text-align:left;color:var(--text);padding:4px 6px}
+.lib-name b{display:block;font-weight:650;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib-name small{display:block;color:var(--muted);font:12px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+/* Bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:rgba(5,7,13,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);
+  padding:10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.bar .inner{max-width:700px;margin:0 auto;display:grid;grid-template-columns:60px 1fr 1fr;gap:10px}
+.bar button{min-height:60px;border-radius:16px;border:1px solid var(--line);background:var(--panel2);font-weight:800;font-size:17px}
+.bar #play{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-size:19px;box-shadow:0 0 18px rgba(40,240,255,.35)}
+.bar #play.stop{background:var(--mag);border-color:var(--mag);color:#fff;box-shadow:0 0 18px rgba(255,60,200,.4)}
+.bar #export{background:#062a1c;border-color:#1c6b4a;color:var(--ok)}
+.bar button:active{transform:scale(.97)}
+.bar button:disabled{opacity:.35}
+#toast{position:fixed;left:50%;bottom:calc(98px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);opacity:0;transition:.2s;background:#000d;border:1px solid var(--line);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;pointer-events:none;z-index:9;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);max-width:min(560px,calc(100vw - 24px));padding:18px}
+dialog::backdrop{background:#000b}
+dialog h3{margin:0 0 8px;font-family:var(--mono);color:var(--accent)}
+dialog ul{padding-left:20px;margin:6px 0}
+dialog li{margin:5px 0}
+kbd{background:#02050a;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:13px;font-family:var(--mono)}
+.desktop-only{display:none!important}
+@media (hover:hover) and (pointer:fine){
+  .desktop-only{display:block!important}
+  li.desktop-only{display:list-item!important}
+  .btn:hover,.seg button:hover,.iconbtn:hover,.tabs button:hover{border-color:#2f5d8a}
+}
+@media (min-width:900px){
+  main{display:grid;grid-template-columns:400px 1fr;gap:16px;align-items:start}
+  .sliders{columns:2;column-gap:16px}
+  .sliders details.sec{break-inside:avoid;margin-top:0}
+  #scope{height:140px}
+  .bar .inner{grid-template-columns:90px 1fr 1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="t"><h1>Sci-Fi <span>SFX</span> Lab</h1><small>// SFX forge · Mr. Horns</small></div>
+  <button class="iconbtn" id="installBtn" hidden aria-label="Install app">⬇︎ Install</button>
+  <button class="iconbtn" id="helpBtn" aria-label="Help">?</button>
+</header>
+<main>
+  <div class="left">
+    <div class="banner" id="iosHint"><p>🔈 <b>No sound?</b> iPhone mutes web audio when the <b>Ring/Silent switch</b> is on silent. Flip it to ring and turn the volume up.</p><button aria-label="Dismiss" data-dismiss="iosHint">✕</button></div>
+    <div class="banner" id="a2hsHint"><p>📲 Install: tap <b>Share</b> → <b>Add to Home Screen</b> to use it like an app (works offline).</p><button aria-label="Dismiss" data-dismiss="a2hsHint">✕</button></div>
+
+    <div class="card">
+      <canvas id="scope" aria-label="Waveform preview. Tap to play."></canvas>
+      <div class="meta"><span id="name">Untitled</span><span id="dur">0.00 s</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Sci-Fi</h2><div class="grid" id="presets-scifi"></div>
+      <h2 class="mag">Retro</h2><div class="grid" id="presets-retro"></div>
+      <h2 class="ok">Movement</h2><div class="grid" id="presets-move"></div>
+      <h2 class="imp">Impacts</h2><div class="grid" id="presets-impact"></div>
+      <h2>Tweak</h2>
+      <div class="grid">
+        <button class="btn mag" id="randomBtn">🎲 Random</button>
+        <button class="btn mag" id="mutateBtn">🧬 Mutate</button>
+        <button class="btn cy" id="saveLibBtn">＋ Save</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Wave</h2>
+      <div class="seg" id="waves" role="group" aria-label="Wave type"></div>
+    </div>
+
+    <details class="sec" id="libSec">
+      <summary>Library <small id="libCount"></small></summary>
+      <div class="body">
+        <div class="tabs"><button id="tabAll" aria-pressed="true">All</button><button id="tabStar" aria-pressed="false">★ Starred</button></div>
+        <div id="libList"></div>
+        <hr>
+        <div class="libtools">
+          <button class="btn" id="importBtn">⇪ Import JSON</button>
+          <button class="btn" id="pasteBtn">📋 Paste JSON</button>
+          <button class="btn" id="exportLibBtn">⤓ Export library</button>
+          <button class="btn" id="clearHistBtn">🧹 Clear unstarred</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json,text/plain" hidden>
+        <p class="note">Every generated sound lands here automatically (newest 60 unstarred are kept). Star a sound to keep it for good.</p>
+      </div>
+    </details>
+
+    <div class="card">
+      <h2>Export</h2>
+      <div class="opts">
+        <label>Sample rate<select id="rate"><option value="44100">44.1 kHz</option><option value="22050">22.05 kHz</option></select></label>
+        <label>Bit depth<select id="bits"><option value="16">16-bit</option><option value="8">8-bit</option></select></label>
+        <label class="full">Save method<select id="method"><option value="auto">Auto (share sheet on phones)</option><option value="share">Share sheet (Files / AirDrop)</option><option value="download">Download link</option></select></label>
+        <label class="toggle full"><input type="checkbox" id="autoplay" checked> Auto-play when a slider is released</label>
+      </div>
+      <hr>
+      <h2>Batch ZIP</h2>
+      <div class="opts">
+        <label>Preset<select id="batchPreset"></select></label>
+        <label>Variations<select id="batchN"><option>5</option><option selected>10</option><option>20</option><option>50</option></select></label>
+        <label class="toggle full"><input type="checkbox" id="batchLib"> Also add them to the library</label>
+        <button class="btn cy full" id="batchBtn">🗜 Generate &amp; save ZIP</button>
+      </div>
+      <button class="dl" id="readyBtn" type="button"></button>
+      <a class="dl" id="dl" download></a>
+    </div>
+
+    <div class="card desktop-only">
+      <h2>Keyboard</h2>
+      <div class="note"><kbd>Space</kbd> play/stop · <kbd>E</kbd> save WAV · <kbd>B</kbd> batch ZIP · <kbd>R</kbd> random · <kbd>M</kbd> mutate · <kbd>S</kbd> save to library · <kbd>Z</kbd> undo · <kbd>W</kbd> next wave · <kbd>1</kbd>–<kbd>9</kbd>,<kbd>0</kbd> sci-fi presets</div>
+    </div>
+  </div>
+
+  <div class="sliders" id="sliders"></div>
+</main>
+
+<nav class="bar">
+  <div class="inner">
+    <button id="undo" aria-label="Undo" disabled>↶</button>
+    <button id="play">▶ Play</button>
+    <button id="export">⤓ Save WAV</button>
+  </div>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="help">
+  <h3>Sci-Fi SFX Lab</h3>
+  <ul>
+    <li>Tap a <b>Sci-Fi</b>, <b>Retro</b>, <b>Movement</b> (whooshes, jumps, dashes) or <b>Impacts</b> (metal, dirt, leaves, hollow, player hit) button. Each tap rolls a fresh random variation of that type. Then tweak the sliders, and tap the waveform or <b>Play</b> to hear it.</li>
+    <li><b>Metal ring</b> adds struck-material resonance (inharmonic partials for metal, low values for wood/hollow knocks). Off by default.</li>
+    <li><b>Engine ⟳</b> sounds are loop-friendly: playback loops (tap Stop to end) and the WAV carries loop points. Turn <b>Loop</b> on in Output for any sound.</li>
+    <li><b>Save WAV</b> opens the share sheet on iPhone: pick <b>Save to Files</b> or <b>AirDrop</b>. On computers it downloads.</li>
+    <li><b>Batch ZIP</b> renders N variations of a preset as WAVs plus a params.json, in one ZIP.</li>
+    <li><b>Library</b>: every sound you generate is kept here. Tap one to recall it, ★ to keep it, ✎ to rename, ⤓ to save its params as JSON, 🗑 to delete.</li>
+    <li>iPhone: if you hear nothing, check the <b>Ring/Silent switch</b> and volume.</li>
+    <li>Install: Safari <b>Share → Add to Home Screen</b>. Works offline after the first visit.</li>
+    <li class="desktop-only">Shortcuts: <kbd>Space</kbd> play, <kbd>E</kbd> WAV, <kbd>B</kbd> batch, <kbd>R</kbd> random, <kbd>M</kbd> mutate, <kbd>S</kbd> save, <kbd>Z</kbd> undo, <kbd>W</kbd> wave, <kbd>1</kbd>–<kbd>0</kbd> presets.</li>
+  </ul>
+  <form method="dialog"><button class="btn" style="width:100%">Close</button></form>
+</dialog>
+<script id="engine">
+/* ===== Sci-Fi SFX Lab engine (pure, no DOM). Also loaded by Node for tests. ===== */
+'use strict';
+const SR = 44100;
+const WAVES = ['Square', 'Saw', 'Sine', 'Noise'];
+// [key, label, signed?, formatter]
+const SECTIONS = [
+  ['Envelope', 'ADSR + length', [['length','Length',0,'len'],['attack','Attack'],['decay','Decay'],['susLevel','Sustain level'],['hold','Sustain time'],['release','Release'],['punch','Punch']]],
+  ['Pitch', 'start & slide', [['base','Start frequency',0,'hz'],['limit','Min freq cutoff',0,'hzoff'],['ramp','Slide',1],['dramp','Delta slide',1]]],
+  ['Vibrato', 'wobble', [['vibDepth','Depth'],['vibSpeed','Speed']]],
+  ['Arpeggio', 'pitch jump', [['arpMod','Jump amount',1],['arpSpeed','Jump speed']]],
+  ['Duty', 'square only', [['duty','Duty cycle'],['dutyRamp','Duty sweep',1]]],
+  ['Retrigger', 'repeat', [['repeat','Repeat speed']]],
+  ['Flanger / Phaser', 'swoosh', [['phaOffset','Offset',1],['phaRamp','Sweep',1]]],
+  ['Filters', 'LP / HP + sweep & bend', [['lpf','Low-pass cutoff'],['lpfRamp','Low-pass sweep',1],['lpfBend','Low-pass sweep bend',1],['lpfRes','Low-pass resonance'],['hpf','High-pass cutoff'],['hpfRamp','High-pass sweep',1]]],
+  ['Metal ring', 'struck resonance', [['ringMix','Mix',0,'off'],['ringFreq','Pitch',0,'ringhz'],['ringDecay','Ring time',0,'ringt'],['ringSpread','Inharmonic']]],
+  ['Lo-fi', 'bit-crush', [['crushBits','Bit depth',0,'bits'],['crushRate','Sample-rate reduce',0,'rate']]],
+  ['Distortion', 'drive', [['drive','Drive',0,'off']]],
+  ['Echo', 'delay', [['delayTime','Time',0,'ms'],['delayFb','Feedback'],['delayMix','Mix',0,'off']]],
+  ['Reverb', 'space', [['revSize','Size'],['revMix','Mix',0,'off']]],
+  ['Output', 'volume & loop', [['vol','Volume']]],
+];
+const SIGNED = new Set(); SECTIONS.forEach(s => s[2].forEach(p => p[2] && SIGNED.add(p[0])));
+const DEFAULTS = {wave:0, base:.3, limit:0, ramp:0, dramp:0, vibDepth:0, vibSpeed:0, arpMod:0, arpSpeed:0, duty:0, dutyRamp:0,
+  repeat:0, phaOffset:0, phaRamp:0, lpf:1, lpfRamp:0, lpfBend:0, lpfRes:0, hpf:0, hpfRamp:0,
+  length:.5, attack:0, decay:0, susLevel:1, hold:.3, release:.4, punch:0,
+  ringMix:0, ringFreq:.5, ringDecay:.4, ringSpread:.8,
+  crushBits:0, crushRate:0, drive:0, delayTime:.3, delayFb:.3, delayMix:0, revSize:.5, revMix:0, vol:.5, loop:0};
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const frnd = x => Math.random() * x;
+const rnd = n => Math.floor(Math.random() * (n + 1));
+const r = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const chance = p => Math.random() < p;
+const lenMul = v => Math.pow(2, v * 4 - 2);
+const baseHz = b => 3528 * (b * b + .001);
+const ringHz = v => 80 * Math.pow(2, v * 6);          // 80 Hz .. 5.1 kHz
+const ringT60 = v => .03 + v * v * 2.5;               // seconds
+
+function sanitize(p){
+  const o = {};
+  for (const k in DEFAULTS){
+    let v = p && p[k] !== undefined ? +p[k] : DEFAULTS[k];
+    if (!Number.isFinite(v)) v = DEFAULTS[k];
+    o[k] = (k === 'wave') ? clamp(Math.round(v), 0, 3) : (k === 'loop') ? (v ? 1 : 0) : clamp(v, SIGNED.has(k) ? -1 : 0, 1);
+  }
+  return o;
+}
+function fmt(key, v, kind){
+  switch (kind){
+    case 'len': return '×' + lenMul(v).toFixed(2);
+    case 'hz': return Math.round(baseHz(v)) + ' Hz';
+    case 'hzoff': return v === 0 ? 'off' : Math.round(baseHz(v)) + ' Hz';
+    case 'bits': return v === 0 ? 'off' : Math.round(16 - v * 14) + '-bit';
+    case 'rate': return v === 0 ? 'off' : Math.round(SR / (1 + Math.round(v * v * 39))) + ' Hz';
+    case 'ms': return Math.round((.02 + v * .58) * 1000) + ' ms';
+    case 'off': return v === 0 ? 'off' : v.toFixed(2);
+    case 'ringhz': return Math.round(ringHz(v)) + ' Hz';
+    case 'ringt': return ringT60(v).toFixed(2) + ' s';
+    default: return v.toFixed(2);
+  }
+}
+
+/* ---------- Presets ---------- */
+const D = () => ({...DEFAULTS});
+const SCIFI = [
+  ['laser', 'Laser', 'Laser', () => { const p = D(); p.wave = pick([0, 0, 1]);
+    p.base = r(.6, .9); p.limit = r(.05, .2); p.ramp = r(-.4, -.18); p.dramp = r(-.08, .04);
+    p.duty = r(.1, .6); p.dutyRamp = r(-.3, .3); p.hold = r(.12, .25); p.release = r(.22, .4); p.punch = r(0, .3);
+    if (chance(.4)) { p.phaOffset = r(0, .25); p.phaRamp = r(-.2, 0); }
+    p.hpf = r(0, .2); if (chance(.4)) { p.delayMix = r(.1, .3); p.delayTime = r(.05, .2); p.delayFb = r(.2, .4); } return p; }],
+  ['blaster', 'Blaster', 'Blaster', () => { const p = D(); p.wave = pick([0, 1]);
+    p.base = r(.4, .62); p.limit = r(.05, .15); p.ramp = r(-.62, -.38); p.duty = r(.3, .7); p.dutyRamp = r(-.2, .2);
+    p.hold = r(.02, .08); p.release = r(.15, .3); p.punch = r(.3, .65); p.drive = r(.3, .7);
+    if (chance(.35)) p.crushBits = r(.3, .6);
+    p.delayMix = r(.1, .25); p.delayTime = r(.05, .15); p.delayFb = r(.1, .3); return p; }],
+  ['plasma', 'Plasma', 'Plasma', () => { const p = D(); p.wave = pick([1, 2]);
+    p.base = r(.35, .55); p.ramp = r(-.25, -.08); p.vibDepth = r(.2, .5); p.vibSpeed = r(.5, .8);
+    p.phaOffset = r(.1, .3); p.phaRamp = r(-.2, .2); p.lpf = r(.4, .7); p.lpfRes = r(.4, .8); p.lpfRamp = r(-.2, 0);
+    p.hold = r(.1, .22); p.release = r(.2, .4); p.revMix = r(.15, .3); p.revSize = r(.3, .6); return p; }],
+  ['explosion', 'Explosion', 'Explosion', () => { const p = D(); p.wave = 3;
+    p.base = r(.08, .25); p.ramp = r(-.3, -.05); p.hold = r(.15, .35); p.release = r(.4, .7); p.punch = r(.4, .8);
+    p.lpf = r(.3, .7); p.lpfRamp = r(-.3, -.05); if (chance(.3)) p.repeat = r(.2, .45);
+    if (chance(.4)) { p.phaOffset = r(-.3, .5); p.phaRamp = r(-.3, 0); }
+    p.drive = r(.2, .5); p.revMix = r(.2, .4); p.revSize = r(.5, .9); if (chance(.3)) p.crushRate = r(.2, .45); return p; }],
+  ['warp', 'Warp', 'Warp/Teleport', () => { const p = D(); p.wave = pick([2, 0, 1]);
+    const out = chance(.5); p.base = out ? r(.55, .75) : r(.2, .35); p.ramp = out ? r(-.5, -.3) : r(.3, .55); p.dramp = r(-.1, .1);
+    p.vibDepth = r(.3, .6); p.vibSpeed = r(.6, .9); p.phaOffset = r(.2, .5); p.phaRamp = r(.2, .5) * pick([1, -1]);
+    if (chance(.5)) p.repeat = r(.4, .7); p.attack = r(.1, .3); p.hold = r(.2, .4); p.release = r(.3, .5); p.duty = r(0, .5);
+    p.delayMix = r(.2, .35); p.delayTime = r(.2, .4); p.delayFb = r(.3, .5); p.revMix = r(.15, .3); return p; }],
+  ['shield', 'Shield', 'Shield', () => { const p = D(); p.wave = pick([1, 2, 0]);
+    p.base = r(.25, .4); p.ramp = r(-.05, .1); p.vibDepth = r(.1, .3); p.vibSpeed = r(.7, .9);
+    p.phaOffset = r(.3, .7); p.phaRamp = r(-.3, .3); p.lpf = r(.5, .8); p.lpfRes = r(.5, .9);
+    p.attack = r(.1, .25); p.hold = r(.3, .5); p.release = r(.3, .5); p.duty = r(.2, .6); p.revMix = r(.2, .35); return p; }],
+  ['powerup', 'Power-up', 'Power-up', () => { const p = D(); p.wave = pick([0, 1, 2]);
+    p.base = r(.25, .4); p.ramp = r(.15, .35); if (chance(.6)) p.repeat = r(.4, .6); else { p.arpSpeed = r(.5, .7); p.arpMod = r(.3, .6); }
+    p.vibDepth = r(0, .3); p.vibSpeed = r(.4, .7); p.duty = r(0, .6); p.phaOffset = r(0, .3); p.phaRamp = r(0, .2);
+    p.hold = r(.2, .4); p.release = r(.2, .4); p.delayMix = r(.15, .3); p.delayTime = r(.1, .25); return p; }],
+  ['pickup', 'Pickup', 'Pickup', () => { const p = D(); p.wave = pick([0, 2]);
+    p.base = r(.55, .75); p.arpSpeed = r(.55, .72); p.arpMod = r(.3, .5); p.duty = r(.2, .6);
+    p.hold = r(.05, .1); p.release = r(.15, .3); p.punch = r(.3, .5);
+    if (chance(.4)) { p.delayMix = r(.15, .3); p.delayTime = r(.1, .2); } if (chance(.3)) p.crushBits = r(.4, .7); return p; }],
+  ['alarm', 'Alarm', 'Alarm', () => { const p = D(); p.wave = pick([0, 1]); p.base = r(.35, .5); p.duty = r(.2, .5);
+    if (chance(.5)) { p.vibDepth = r(.4, .7); p.vibSpeed = r(.1, .2); }          // siren sweep
+    else { p.arpSpeed = r(.6, .75); p.arpMod = r(.3, .5); p.repeat = r(.55, .7); } // two-tone klaxon
+    p.hold = r(.65, .85); p.release = r(.1, .2); p.length = r(.55, .65); p.lpf = r(.6, .9); p.revMix = r(0, .2); return p; }],
+  ['engine', 'Engine ⟳', 'Engine hum', () => { const p = D(); p.wave = pick([1, 0]); p.loop = 1;
+    p.base = r(.08, .15); p.vibDepth = r(.02, .08); p.vibSpeed = r(.4, .6); p.duty = r(.2, .5);
+    p.lpf = r(.25, .45); p.lpfRes = r(.3, .6); p.phaOffset = r(.05, .2); p.hold = r(.7, .85); p.release = 0; p.length = .5;
+    p.drive = r(.1, .3); if (chance(.3)) p.crushRate = r(.1, .3); return p; }],
+  ['robot', 'Robot', 'Robot voice', () => { const p = D(); p.wave = 0;
+    p.base = r(.3, .5); p.arpSpeed = r(.6, .85); p.arpMod = r(-.5, .5); p.repeat = r(.5, .75);
+    p.duty = r(.2, .6); p.dutyRamp = r(-.2, .2); p.lpf = r(.5, .8); p.lpfRes = r(.4, .8);
+    p.crushBits = r(.4, .7); p.crushRate = r(.3, .6); p.hold = r(.3, .45); p.release = r(.15, .3);
+    if (chance(.5)) { p.vibDepth = r(.05, .2); p.vibSpeed = r(.7, 1); } return p; }],
+  ['uibeep', 'UI Beep', 'UI beep', () => { const p = D(); p.wave = pick([2, 0]);
+    p.base = r(.5, .7); p.attack = .02; p.hold = r(.03, .08); p.release = r(.05, .15); p.duty = r(.3, .5); p.hpf = .1;
+    if (chance(.5)) { p.arpSpeed = r(.6, .75); p.arpMod = r(.2, .45); } p.revMix = r(0, .15); p.revSize = .2; return p; }],
+  ['impact', 'Impact', 'Hit/impact', () => { const p = D(); p.wave = pick([3, 3, 0]);
+    p.base = r(.15, .35); p.ramp = r(-.5, -.3); p.hold = r(0, .06); p.release = r(.15, .3); p.punch = r(.5, .9);
+    p.drive = r(.3, .6); p.lpf = r(.5, .9); p.revMix = r(.05, .2); p.revSize = r(.2, .5); return p; }],
+  ['charge', 'Charge-up', 'Charge-up', () => { const p = D(); p.wave = pick([1, 0, 2]);
+    p.base = r(.15, .25); p.ramp = r(.15, .3); p.dramp = r(0, .15); p.vibDepth = r(.1, .3); p.vibSpeed = r(.6, .8);
+    p.attack = r(.3, .5); p.hold = r(.4, .6); p.release = r(.05, .1); p.phaOffset = r(0, .2); p.phaRamp = r(.1, .3);
+    p.lpf = r(.3, .5); p.lpfRamp = r(.1, .3); p.duty = r(0, .5); p.dutyRamp = r(0, .3); return p; }],
+  ['door', 'Door', 'Sci-fi door', () => { const p = D(); p.wave = 3;
+    p.base = r(.3, .5); p.ramp = r(-.1, .1); p.lpf = r(.2, .4); p.lpfRamp = r(.05, .25); p.hpf = r(.05, .15);
+    p.attack = r(.1, .2); p.hold = r(.15, .3); p.release = r(.2, .4); p.phaOffset = r(.2, .5); p.phaRamp = r(-.3, .3);
+    if (chance(.4)) p.repeat = r(.1, .3); p.revMix = r(.1, .25); p.revSize = r(.3, .6); return p; }],
+];
+// Classic sfxr generators (envelope: sfxr sustain -> hold, sfxr decay -> release)
+const RETRO = [
+  ['coin', 'Coin', 'Coin', () => { const p = D(); p.base = .4 + frnd(.5); p.hold = frnd(.1); p.release = .1 + frnd(.4); p.punch = .3 + frnd(.3);
+    if (rnd(1)) { p.arpSpeed = .5 + frnd(.2); p.arpMod = .2 + frnd(.4); } return p; }],
+  ['jump', 'Jump', 'Jump', () => { const p = D(); p.duty = frnd(.6); p.base = .3 + frnd(.3); p.ramp = .1 + frnd(.2);
+    p.hold = .1 + frnd(.3); p.release = .1 + frnd(.2); if (rnd(1)) p.hpf = frnd(.3); if (rnd(1)) p.lpf = 1 - frnd(.6); return p; }],
+  ['blip', 'Blip', 'Blip', () => { const p = D(); p.wave = rnd(1); if (p.wave === 0) p.duty = frnd(.6);
+    p.base = .2 + frnd(.4); p.hold = .1 + frnd(.1); p.release = frnd(.2); p.hpf = .1; return p; }],
+  ['rlaser', 'Laser', 'Retro laser', () => { const p = D(); p.wave = rnd(2); if (p.wave === 2 && rnd(1)) p.wave = rnd(1);
+    p.base = .5 + frnd(.5); p.limit = Math.max(.2, p.base - .2 - frnd(.6)); p.ramp = -.15 - frnd(.2);
+    if (rnd(2) === 0) { p.base = .3 + frnd(.6); p.limit = frnd(.1); p.ramp = -.35 - frnd(.3); }
+    if (rnd(1)) { p.duty = frnd(.5); p.dutyRamp = frnd(.2); } else { p.duty = .4 + frnd(.5); p.dutyRamp = -frnd(.7); }
+    p.hold = .1 + frnd(.2); p.release = frnd(.4); if (rnd(1)) p.punch = frnd(.3);
+    if (rnd(2) === 0) { p.phaOffset = frnd(.2); p.phaRamp = -frnd(.2); } if (rnd(1)) p.hpf = frnd(.3); return p; }],
+  ['rboom', 'Explosion', 'Retro explosion', () => { const p = D(); p.wave = 3;
+    if (rnd(1)) { p.base = .1 + frnd(.4); p.ramp = -.1 + frnd(.4); } else { p.base = .2 + frnd(.7); p.ramp = -.2 - frnd(.2); }
+    p.base *= p.base; if (rnd(4) === 0) p.ramp = 0; if (rnd(2) === 0) p.repeat = .3 + frnd(.5);
+    p.hold = .1 + frnd(.3); p.release = frnd(.5); if (rnd(1) === 0) { p.phaOffset = -.3 + frnd(.9); p.phaRamp = -frnd(.3); }
+    p.punch = .2 + frnd(.6); if (rnd(1)) { p.vibDepth = frnd(.7); p.vibSpeed = frnd(.6); }
+    if (rnd(2) === 0) { p.arpSpeed = .6 + frnd(.3); p.arpMod = .8 - frnd(1.6); } return p; }],
+  ['rpower', 'Power-up', 'Retro power-up', () => { const p = D(); if (rnd(1)) p.wave = 1; else p.duty = frnd(.6);
+    if (rnd(1)) { p.base = .2 + frnd(.3); p.ramp = .1 + frnd(.4); p.repeat = .4 + frnd(.4); }
+    else { p.base = .2 + frnd(.3); p.ramp = .05 + frnd(.2); if (rnd(1)) { p.vibDepth = frnd(.7); p.vibSpeed = frnd(.6); } }
+    p.hold = frnd(.4); p.release = .1 + frnd(.4); return p; }],
+  ['rhit', 'Hit', 'Retro hit', () => { const p = D(); p.wave = rnd(2); if (p.wave === 2) p.wave = 3; if (p.wave === 0) p.duty = frnd(.6);
+    p.base = .2 + frnd(.6); p.ramp = -.3 - frnd(.4); p.hold = frnd(.1); p.release = .1 + frnd(.2); if (rnd(1)) p.hpf = frnd(.3); return p; }],
+];
+// Movement: whooshes = noise through a resonant low-pass that sweeps up then bends back down; jumps = quick pitch-up tones; dashes
+const MOVE = [
+  ['swish', 'Swish', 'Whoosh light', () => { const p = D(); p.wave = 3;
+    p.base = r(.36, .46); p.lpf = r(.27, .33); p.lpfRamp = r(.5, .7); p.lpfBend = r(.75, .85); p.lpfRes = r(.45, .65); p.hpf = r(.12, .18);
+    p.attack = r(.17, .23); p.hold = r(.15, .2); p.release = r(.28, .35); if (chance(.4)) { p.phaOffset = r(.05, .15); p.phaRamp = r(-.15, .15); } return p; }],
+  ['whoosh', 'Whoosh', 'Whoosh heavy', () => { const p = D(); p.wave = 3;
+    p.base = r(.24, .32); p.ramp = r(-.05, 0); p.lpf = r(.18, .23); p.lpfRamp = r(.3, .4); p.lpfBend = r(.5, .6); p.lpfRes = r(.3, .5);
+    p.attack = r(.28, .35); p.hold = r(.24, .32); p.release = r(.42, .52); p.phaOffset = r(.1, .22); p.phaRamp = r(-.2, 0);
+    p.drive = r(0, .15); if (chance(.5)) { p.revMix = r(.08, .18); p.revSize = r(.3, .5); } return p; }],
+  ['swing', 'Swing', 'Whoosh swing', () => { const p = D(); p.wave = 3;
+    p.base = r(.45, .55); p.lpf = r(.25, .31); p.lpfRamp = r(.7, .9); p.lpfBend = r(.9, 1); p.lpfRes = r(.78, .9); p.hpf = r(.17, .23);
+    p.attack = r(.12, .16); p.hold = r(.1, .14); p.release = r(.25, .3); if (chance(.4)) { p.phaOffset = r(.05, .12); p.phaRamp = r(.05, .15); } return p; }],
+  ['flyby', 'Fly-by', 'Whoosh fly-by', () => { const p = D(); p.wave = 3;
+    p.base = r(.36, .44); p.ramp = r(-.08, -.04); p.lpf = r(.2, .24); p.lpfRamp = r(.26, .34); p.lpfBend = r(.45, .55); p.lpfRes = r(.4, .6);
+    p.phaOffset = r(.25, .38); p.phaRamp = r(-.38, -.22); p.attack = r(.42, .48); p.hold = r(.17, .23); p.release = r(.42, .48);
+    if (chance(.5)) { p.revMix = r(.08, .16); p.revSize = r(.4, .6); } return p; }],
+  ['hop', 'Hop', 'Jump hop', () => { const p = D(); p.wave = pick([0, 0, 2]); p.duty = r(.3, .55);
+    p.base = r(.36, .44); p.ramp = r(.2, .28); p.hold = r(.14, .2); p.release = r(.16, .22); p.punch = r(0, .2); p.hpf = r(.05, .12); p.lpf = r(.75, .95); return p; }],
+  ['bigjump', 'Big jump', 'Jump big', () => { const p = D(); p.wave = pick([0, 1]); p.duty = r(.2, .5); p.dutyRamp = r(-.2, 0);
+    p.base = r(.24, .3); p.ramp = r(.16, .2); p.dramp = r(-.12, -.06); p.hold = r(.26, .32); p.release = r(.3, .38); p.punch = r(.1, .3);
+    p.vibDepth = r(0, .08); p.vibSpeed = r(.5, .7); p.lpf = r(.7, .85); p.hpf = r(.04, .1);
+    if (chance(.4)) { p.delayMix = r(.08, .15); p.delayTime = r(.08, .15); p.delayFb = r(.15, .3); } return p; }],
+  ['dbljump', 'Double jump', 'Jump double', () => { const p = D(); p.wave = pick([0, 0, 2]); p.duty = r(.3, .5);
+    p.base = r(.34, .4); p.ramp = r(.2, .26); p.arpSpeed = r(.6, .65); p.arpMod = r(.5, .6);
+    p.hold = r(.24, .28); p.release = r(.2, .26); p.punch = r(.1, .3); p.phaOffset = r(.05, .15); p.phaRamp = r(0, .15); p.hpf = r(.05, .12); p.lpf = r(.8, .95); return p; }],
+  ['boing', 'Boing', 'Jump spring', () => { const p = D(); p.wave = pick([2, 0, 1]); p.duty = r(.3, .5);
+    p.base = r(.26, .32); p.ramp = r(.08, .14); p.dramp = r(-.08, 0); p.vibDepth = r(.38, .5); p.vibSpeed = r(.5, .6);
+    p.attack = .02; p.hold = r(.25, .3); p.release = r(.38, .45); p.punch = r(.2, .4); p.lpf = r(.6, .8); p.lpfRes = r(.2, .4); return p; }],
+  ['land', 'Land', 'Jump landing', () => { const p = D(); p.wave = 3;
+    p.base = r(.08, .13); p.ramp = r(-.3, -.18); p.hold = r(.04, .07); p.release = r(.2, .26); p.punch = r(.6, .85);
+    p.lpf = r(.28, .36); p.lpfRamp = r(-.25, -.1); p.drive = r(.15, .3); if (chance(.4)) { p.revMix = r(.04, .1); p.revSize = .2; } return p; }],
+  ['dash', 'Dash', 'Dash quick', () => { const p = D(); p.wave = 3;
+    p.base = r(.5, .6); p.ramp = r(-.06, -.02); p.lpf = r(.55, .65); p.lpfRamp = r(-.7, -.5); p.lpfRes = r(.25, .45); p.hpf = r(.12, .18);
+    p.attack = r(.05, .07); p.hold = r(.1, .14); p.release = r(.22, .27); p.punch = r(.2, .4); if (chance(.5)) { p.phaOffset = r(.1, .2); p.phaRamp = r(-.25, -.1); } return p; }],
+  ['airdash', 'Air dash', 'Dash air', () => { const p = D(); p.wave = 3;
+    p.base = r(.5, .6); p.lpf = r(.32, .38); p.lpfRamp = r(.7, .9); p.lpfBend = r(.92, 1); p.lpfRes = r(.58, .72); p.hpf = r(.22, .28); p.hpfRamp = r(0, .1);
+    p.attack = r(.07, .09); p.hold = r(.12, .16); p.release = r(.24, .28); p.punch = r(.1, .3); p.phaOffset = r(.15, .3); p.phaRamp = r(.1, .25);
+    p.delayMix = r(.1, .18); p.delayTime = r(.06, .12); p.delayFb = r(.1, .25); return p; }],
+  ['blink', 'Blink', 'Dash blink', () => { const p = D(); p.wave = pick([0, 2, 1]); p.duty = r(.2, .5); p.dutyRamp = r(-.3, -.1);
+    p.base = r(.24, .3); p.ramp = r(.4, .5); p.vibDepth = r(.1, .2); p.vibSpeed = r(.85, 1);
+    p.phaOffset = r(.3, .45); p.phaRamp = r(.2, .35); p.hold = r(.12, .16); p.release = r(.2, .26); p.hpf = r(.1, .18);
+    p.delayMix = r(.15, .25); p.delayTime = r(.08, .14); p.delayFb = r(.2, .35); if (chance(.3)) p.crushBits = r(.3, .5); return p; }],
+];
+// Impacts: material hits. A short noise/tone strike excites the Metal ring resonator bank (inharmonic for metal, near-harmonic and
+// low for wood/hollow/dirt thumps); echo/reverb add room; player hits are punchy pitch-dropping tones for a busy mix.
+const IMPACT = [
+  ['hitmetal', 'Metal foe', 'Hit metal enemy', () => { const p = D(); p.wave = 3;
+    p.base = r(.45, .6); p.hold = r(.03, .05); p.release = r(.1, .14); p.punch = r(.7, .9); p.hpf = r(.08, .14);
+    p.ringMix = r(.62, .75); p.ringFreq = r(.45, .55); p.ringDecay = r(.28, .34); p.ringSpread = r(.88, 1);
+    p.drive = r(.2, .35); if (chance(.35)) p.crushBits = r(.3, .45); p.revMix = r(.04, .1); p.revSize = r(.2, .35); return p; }],
+  ['hitmetalh', 'Armored foe', 'Hit metal enemy heavy', () => { const p = D(); p.wave = 3;
+    p.base = r(.3, .4); p.ramp = r(-.25, -.1); p.hold = r(.05, .07); p.release = r(.16, .2); p.punch = r(.8, .95); p.lpf = r(.7, .85);
+    p.ringMix = r(.68, .8); p.ringFreq = r(.3, .38); p.ringDecay = r(.4, .5); p.ringSpread = r(.85, 1);
+    p.drive = r(.38, .5); if (chance(.4)) p.crushRate = r(.15, .3); p.revMix = r(.08, .14); p.revSize = r(.3, .45); return p; }],
+  ['hitobj', 'Clank', 'Hit metal object', () => { const p = D(); p.wave = 3;
+    p.base = r(.55, .7); p.hold = r(.02, .03); p.release = r(.07, .1); p.punch = r(.6, .8); p.hpf = r(.12, .2);
+    p.ringMix = r(.6, .7); p.ringFreq = r(.55, .68); p.ringDecay = r(.55, .65); p.ringSpread = r(.7, .85);
+    p.revMix = r(.08, .14); p.revSize = r(.25, .4); return p; }],
+  ['hitobjh', 'Big clank', 'Hit metal object heavy', () => { const p = D(); p.wave = 3;
+    p.base = r(.32, .42); p.hold = r(.04, .06); p.release = r(.12, .16); p.punch = r(.7, .9); p.hpf = r(.04, .08);
+    p.ringMix = r(.66, .76); p.ringFreq = r(.38, .48); p.ringDecay = r(.7, .8); p.ringSpread = r(.65, .82);
+    p.drive = r(.05, .15); p.revMix = r(.12, .18); p.revSize = r(.35, .5); return p; }],
+  ['hitdirt', 'Dirt', 'Hit dirt', () => { const p = D(); p.wave = 3;
+    p.base = r(.1, .16); p.ramp = r(-.2, -.08); p.lpf = r(.25, .32); p.lpfRamp = r(-.25, -.1); p.hold = r(.03, .05); p.release = r(.16, .22); p.punch = r(.6, .8);
+    p.ringMix = r(.15, .25); p.ringFreq = r(.03, .08); p.ringDecay = r(.1, .14); p.ringSpread = 0;
+    if (chance(.5)) p.crushRate = r(.1, .2); return p; }],
+  ['hitdirth', 'Dirt thud', 'Hit dirt heavy', () => { const p = D(); p.wave = 3;
+    p.base = r(.07, .11); p.ramp = r(-.25, -.12); p.lpf = r(.2, .26); p.lpfRamp = r(-.3, -.12); p.hold = r(.06, .09); p.release = r(.26, .32); p.punch = r(.8, .95);
+    p.ringMix = r(.25, .35); p.ringFreq = r(0, .04); p.ringDecay = r(.16, .2); p.ringSpread = 0;
+    p.drive = r(.15, .28); if (chance(.5)) p.crushRate = r(.15, .25); if (chance(.4)) { p.revMix = r(.04, .08); p.revSize = .2; } return p; }],
+  ['hitleaf', 'Leaves', 'Hit leaves', () => { const p = D(); p.wave = 3;
+    p.base = r(.55, .7); p.ramp = r(-.2, -.1); p.repeat = r(.6, .72); p.vibDepth = r(.3, .5); p.vibSpeed = r(.85, 1);
+    p.lpf = r(.55, .65); p.lpfRes = r(.4, .6); p.hpf = r(.25, .35); p.attack = r(.03, .05); p.hold = r(.1, .14); p.release = r(.2, .26); p.punch = r(.1, .3);
+    p.ringMix = r(.2, .3); p.ringFreq = r(.04, .1); p.ringDecay = r(.08, .12); p.ringSpread = 0; return p; }],
+  ['hitleafh', 'Leaf pile', 'Hit leaves heavy', () => { const p = D(); p.wave = 3;
+    p.base = r(.45, .55); p.ramp = r(-.18, -.08); p.repeat = r(.5, .62); p.vibDepth = r(.35, .55); p.vibSpeed = r(.8, .95);
+    p.lpf = r(.45, .55); p.lpfRes = r(.35, .55); p.hpf = r(.18, .26); p.attack = r(.04, .06); p.hold = r(.18, .22); p.release = r(.28, .34); p.punch = r(.3, .5);
+    p.ringMix = r(.28, .36); p.ringFreq = r(.02, .07); p.ringDecay = r(.12, .16); p.ringSpread = 0; return p; }],
+  ['hollow', 'Hollow', 'Hit hollow', () => { const p = D(); p.wave = 3;
+    p.base = r(.35, .45); p.hold = r(.02, .03); p.release = r(.04, .06); p.punch = r(.7, .9); p.lpf = r(.6, .75);
+    p.ringMix = r(.75, .85); p.ringFreq = r(.22, .3); p.ringDecay = r(.25, .32); p.ringSpread = r(.15, .3);
+    p.delayMix = r(.2, .28); p.delayTime = r(.2, .3); p.delayFb = r(.3, .4); p.revMix = r(.25, .32); p.revSize = r(.55, .65); return p; }],
+  ['hollowecho', 'Basement', 'Hit hollow echo', () => { const p = D(); p.wave = 3;
+    p.base = r(.28, .36); p.hold = r(.03, .04); p.release = r(.05, .08); p.punch = r(.8, .95); p.lpf = r(.5, .62);
+    p.ringMix = r(.75, .85); p.ringFreq = r(.15, .22); p.ringDecay = r(.3, .38); p.ringSpread = r(.15, .3);
+    p.delayMix = r(.35, .45); p.delayTime = r(.35, .45); p.delayFb = r(.5, .6); p.revMix = r(.35, .42); p.revSize = r(.8, .9); return p; }],
+  ['phit', 'Hurt', 'Player hit', () => { const p = D(); p.wave = 0; p.duty = r(.3, .5);
+    p.base = r(.45, .55); p.ramp = r(-.4, -.3); p.hold = r(.06, .09); p.release = r(.26, .32); p.punch = r(.7, .9); p.lpf = r(.75, .9); p.hpf = r(.03, .07);
+    p.ringMix = r(.2, .3); p.ringFreq = r(.08, .14); p.ringDecay = r(.08, .12); p.ringSpread = r(0, .15);
+    p.drive = r(.4, .55); if (chance(.4)) p.crushBits = r(.25, .4); return p; }],
+  ['phith', 'Big hurt', 'Player hit heavy', () => { const p = D(); p.wave = pick([0, 1]); p.duty = r(.3, .5);
+    p.base = r(.38, .45); p.ramp = r(-.42, -.32); p.dramp = r(0, .08); p.vibDepth = r(.15, .25); p.vibSpeed = r(.65, .8);
+    p.hold = r(.08, .1); p.release = r(.26, .3); p.punch = r(.85, 1); p.lpf = r(.7, .85); p.hpf = r(.02, .05);
+    p.ringMix = r(.3, .38); p.ringFreq = r(.05, .1); p.ringDecay = r(.13, .17); p.ringSpread = r(0, .15);
+    p.drive = r(.55, .7); if (chance(.5)) p.crushRate = r(.18, .28); p.revMix = r(.05, .1); p.revSize = .2; return p; }],
+];
+const PRESETS = {};
+[['Sci-Fi', SCIFI], ['Retro', RETRO], ['Movement', MOVE], ['Impacts', IMPACT]].forEach(([group, list]) => list.forEach(([id, label, name, fn]) => { PRESETS[id] = {id, label, name, group, fn}; }));
+function generate(id){ return sanitize(PRESETS[id].fn()); }
+
+function randomize(){
+  const p = D(), c = x => x * x * x;
+  p.wave = rnd(3); p.base = Math.pow(frnd(2) - 1, 2); if (rnd(1)) p.base = Math.pow(frnd(2) - 1, 3) + .5;
+  p.ramp = Math.pow(frnd(2) - 1, 5); if (p.base > .7 && p.ramp > .2) p.ramp = -p.ramp; if (p.base < .2 && p.ramp < -.05) p.ramp = -p.ramp;
+  p.dramp = Math.pow(frnd(2) - 1, 3); p.duty = frnd(2) - 1; p.dutyRamp = Math.pow(frnd(2) - 1, 3);
+  p.vibDepth = Math.pow(frnd(2) - 1, 3); p.vibSpeed = frnd(2) - 1;
+  p.attack = c(frnd(2) - 1); p.hold = Math.pow(frnd(2) - 1, 2); p.release = frnd(2) - 1; p.punch = Math.pow(frnd(.8), 2);
+  if (p.attack + p.hold + p.release < .2) { p.hold += .2 + frnd(.3); p.release += .2 + frnd(.3); }
+  p.lpfRes = frnd(2) - 1; p.lpf = 1 - Math.pow(frnd(1), 3); p.lpfRamp = Math.pow(frnd(2) - 1, 3);
+  if (p.lpf < .1 && p.lpfRamp < -.05) p.lpfRamp = -p.lpfRamp;
+  p.hpf = Math.pow(frnd(1), 5); p.hpfRamp = Math.pow(frnd(2) - 1, 5);
+  p.phaOffset = Math.pow(frnd(2) - 1, 3); p.phaRamp = Math.pow(frnd(2) - 1, 3);
+  p.repeat = frnd(2) - 1; p.arpSpeed = frnd(2) - 1; p.arpMod = frnd(2) - 1;
+  if (chance(.25)) p.crushBits = r(.2, .7); if (chance(.2)) p.crushRate = r(.1, .5); if (chance(.25)) p.drive = r(.1, .6);
+  if (chance(.3)) { p.delayMix = r(.1, .35); p.delayTime = r(.05, .5); p.delayFb = r(.1, .5); }
+  if (chance(.3)) { p.revMix = r(.1, .35); p.revSize = r(.2, .8); }
+  return sanitize(p);
+}
+const RING_KEYS = new Set(['ringMix', 'ringFreq', 'ringDecay', 'ringSpread']);
+function mutate(src){
+  const p = {...src};
+  for (const k in DEFAULTS){ if (k === 'wave' || k === 'vol' || k === 'loop') continue; if (RING_KEYS.has(k) && !src.ringMix) continue; if (rnd(1)) p[k] += frnd(.1) - .05; }
+  return sanitize(p);
+}
+
+/* ---------- Synth core (sfxr-style, 8x supersampling) + FX chain ---------- */
+function synth(input){
+  const p = sanitize(input), LM = lenMul(p.length);
+  const MAX = SR * 12, out = new Float32Array(MAX);
+  let phase = 0, fperiod, fmaxperiod, fslide, fdslide, period, squareDuty, squareSlide, arpMod, arpTime, arpLimit;
+  let fltp, fltdp, fltw, fltwD, fltwDD, fltdmp, fltphp, flthp, flthpD, vibPhase, vibSpeed, vibAmp;
+  let envVol = 0, envStage, envTime, envLen, fphase, fdphase, iphase, ipp, repTime, repLimit;
+  const phaser = new Float32Array(1024), noise = new Float32Array(32);
+  function reset(restart){
+    if (!restart) phase = 0;
+    fperiod = 100 / (p.base * p.base + .001); period = fperiod | 0;
+    fmaxperiod = 100 / (p.limit * p.limit + .001);
+    fslide = 1 - Math.pow(p.ramp, 3) * .01; fdslide = -Math.pow(p.dramp, 3) * 1e-6;
+    squareDuty = .5 - p.duty * .5; squareSlide = -p.dutyRamp * 5e-5;
+    arpMod = p.arpMod >= 0 ? 1 - p.arpMod * p.arpMod * .9 : 1 + p.arpMod * p.arpMod * 10;
+    arpTime = 0; arpLimit = (Math.pow(1 - p.arpSpeed, 2) * 20000 + 32) | 0; if (p.arpSpeed === 1) arpLimit = 0;
+    if (!restart){
+      fltp = 0; fltdp = 0; fltw = Math.pow(p.lpf, 3) * .1; fltwD = 1 + p.lpfRamp * 1e-4;
+      fltwDD = -Math.pow(p.lpfBend, 3) * 4e-8; // bend: + arcs the sweep back down (whooshes), - curves it up
+      fltdmp = Math.min(.8, 5 / (1 + p.lpfRes * p.lpfRes * 20) * (.01 + fltw));
+      fltphp = 0; flthp = p.hpf * p.hpf * .1; flthpD = 1 + p.hpfRamp * 3e-4;
+      vibPhase = 0; vibSpeed = p.vibSpeed * p.vibSpeed * .01; vibAmp = p.vibDepth * .5;
+      envStage = 0; envTime = 0;
+      envLen = [p.attack, p.decay, p.hold, p.release].map(v => (v * v * 1e5 * LM) | 0);
+      fphase = p.phaOffset * p.phaOffset * 1020; if (p.phaOffset < 0) fphase = -fphase;
+      fdphase = p.phaRamp * p.phaRamp; if (p.phaRamp < 0) fdphase = -fdphase;
+      iphase = Math.abs(fphase | 0); ipp = 0; phaser.fill(0);
+      for (let i = 0; i < 32; i++) noise[i] = Math.random() * 2 - 1;
+      repTime = 0; repLimit = (Math.pow(1 - p.repeat, 2) * 20000 * LM + 32) | 0; if (p.repeat === 0) repLimit = 0;
+    }
+  }
+  reset(false);
+  const S = p.susLevel;
+  let n = 0;
+  for (; n < MAX; n++){
+    if (repLimit !== 0 && ++repTime >= repLimit){ repTime = 0; reset(true); }
+    if (arpLimit !== 0 && ++arpTime >= arpLimit){ arpLimit = 0; fperiod *= arpMod; }
+    fslide += fdslide; fperiod *= fslide;
+    if (fperiod > fmaxperiod){ fperiod = fmaxperiod; if (p.limit > 0) break; }
+    let rfperiod = fperiod;
+    if (vibAmp > 0){ vibPhase += vibSpeed; rfperiod = fperiod * (1 + Math.sin(vibPhase) * vibAmp); }
+    period = Math.max(8, rfperiod | 0);
+    squareDuty = clamp(squareDuty + squareSlide, 0, .5);
+    if (++envTime > envLen[envStage]){ envTime = 0; if (++envStage === 4) break; }
+    const t = envTime / Math.max(1, envLen[envStage]);
+    envVol = envStage === 0 ? t : envStage === 1 ? 1 - (1 - S) * t : envStage === 2 ? S * (1 + 2 * p.punch * (1 - t)) : S * (1 - t);
+    fphase += fdphase; iphase = Math.min(1023, Math.abs(fphase | 0));
+    if (fltwDD !== 0) fltwD = clamp(fltwD + fltwDD, .9995, 1.0005);
+    if (flthpD !== 0) flthp = clamp(flthp * flthpD, 1e-5, .1);
+    let ss = 0;
+    for (let si = 0; si < 8; si++){
+      let s; phase++;
+      if (phase >= period){ phase %= period; if (p.wave === 3) for (let i = 0; i < 32; i++) noise[i] = Math.random() * 2 - 1; }
+      const fp = phase / period;
+      switch (p.wave){
+        case 0: s = fp < squareDuty ? .5 : -.5; break;
+        case 1: s = 1 - fp * 2; break;
+        case 2: s = Math.sin(fp * 2 * Math.PI); break;
+        default: s = noise[(phase * 32 / period) | 0];
+      }
+      const pp = fltp; fltw = clamp(fltw * fltwD, 0, .1);
+      if (p.lpf !== 1){ fltdp += (s - fltp) * fltw; fltdp -= fltdp * fltdmp; } else { fltp = s; fltdp = 0; }
+      fltp += fltdp;
+      fltphp += fltp - pp; fltphp -= fltphp * flthp; s = fltphp;
+      phaser[ipp & 1023] = s; s += phaser[(ipp - iphase + 1024) & 1023]; ipp = (ipp + 1) & 1023;
+      ss += s * envVol;
+    }
+    out[n] = ss / 8;
+  }
+  let x = out.slice(0, Math.max(2, n));
+  if (p.loop) x = loopCrossfade(x);
+  return postFX(x, p);
+}
+function peakOf(x){ let m = 0; for (let i = 0; i < x.length; i++){ const a = Math.abs(x[i]); if (a > m) m = a; } return m; }
+function scale(x, g){ for (let i = 0; i < x.length; i++) x[i] *= g; }
+function loopCrossfade(b){
+  const X = Math.min(Math.floor(b.length / 4), Math.round(.15 * SR)); if (X < 2) return b;
+  const y = b.slice(0, b.length - X);
+  for (let i = 0; i < X; i++){ const a = i / X * Math.PI / 2; y[i] = b[i] * Math.sin(a) + b[b.length - X + i] * Math.cos(a); }
+  return y;
+}
+// Wrap an effect tail back onto the start so loops stay seamless.
+function fold(y, len){ const o = y.slice(0, len); for (let i = len; i < y.length; i++) o[i % len] += y[i]; return o; }
+// Metal ring: a bank of decaying two-pole resonators (modal synthesis) excited by the strike. Spread 0 = harmonic partials with a
+// steep roll-off (wood/hollow knock, body thump); spread 1 = inharmonic bar/plate partials (clangy metal). Skipped when Mix is 0.
+const RING_INH = [1, 2.76, 5.40, 8.93, 1.47, 3.91, 2.09, 6.21];
+function ringFX(x, p){
+  const f0 = ringHz(p.ringFreq), T = ringT60(p.ringDecay), sp = p.ringSpread, tail = Math.round(T * SR * 1.2);
+  const L = x.length + tail, ring = new Float32Array(L);
+  for (let k = 0; k < 8; k++){
+    const ratio = (k + 1) + (RING_INH[k] - (k + 1)) * sp, f = f0 * ratio; if (f > SR * .45) continue;
+    const amp = Math.pow(k + 1, -(.6 + (1 - sp) * 1.4)), t60 = T / (1 + k * .35);
+    const rr = Math.exp(-6.91 / (t60 * SR)), c1 = 2 * rr * Math.cos(2 * Math.PI * f / SR), c2 = -rr * rr, g = amp * (1 - rr);
+    let y1 = 0, y2 = 0;
+    for (let i = 0; i < L; i++){ const y = (i < x.length ? x[i] : 0) * g + c1 * y1 + c2 * y2; y2 = y1; y1 = y; ring[i] += y; }
+  }
+  const rp = peakOf(ring); if (rp > 0) scale(ring, 1 / rp);
+  const dry = 1 - p.ringMix * .6;
+  for (let i = 0; i < x.length; i++) ring[i] = x[i] * dry + ring[i] * p.ringMix;
+  for (let i = x.length; i < L; i++) ring[i] *= p.ringMix;
+  return p.loop ? fold(ring, x.length) : ring;
+}
+function postFX(x, p){
+  const pk = peakOf(x); if (pk > 0) scale(x, 1 / pk);
+  if (p.ringMix > 0){ x = ringFX(x, p); const rk = peakOf(x); if (rk > 0) scale(x, 1 / rk); }
+  if (p.drive > 0){ const k = 1 + p.drive * p.drive * 30, d = Math.tanh(k); for (let i = 0; i < x.length; i++) x[i] = Math.tanh(x[i] * k) / d; }
+  if (p.crushRate > 0){ const f = 1 + Math.round(p.crushRate * p.crushRate * 39); let h = 0; for (let i = 0; i < x.length; i++){ if (i % f === 0) h = x[i]; x[i] = h; } }
+  if (p.crushBits > 0){ const q = Math.pow(2, Math.round(16 - p.crushBits * 14) - 1); for (let i = 0; i < x.length; i++) x[i] = Math.round(x[i] * q) / q; }
+  const len = x.length;
+  if (p.delayMix > 0){
+    const d = Math.round((.02 + p.delayTime * .58) * SR), fb = p.delayFb * .9;
+    const reps = fb > .01 ? Math.min(40, Math.ceil(Math.log(.001) / Math.log(fb))) : 1;
+    const tail = Math.min(SR * 4, d * reps), L = x.length + tail, w = new Float32Array(L), y = new Float32Array(L);
+    y.set(x);
+    for (let i = d; i < L; i++) w[i] = (i - d < x.length ? x[i - d] : 0) + fb * w[i - d];
+    for (let i = 0; i < L; i++) y[i] += p.delayMix * w[i];
+    x = y;
+  }
+  if (p.revMix > 0){
+    const sc = .5 + p.revSize, g = Math.min(.94, .72 + p.revSize * .22), damp = .35;
+    const tail = Math.round(SR * (.4 + p.revSize * 2.6)), L = x.length + tail, wet = new Float32Array(L);
+    for (const c0 of [1557, 1617, 1491, 1422, 1277, 1356]){
+      const c = Math.round(c0 * sc), buf = new Float32Array(c); let idx = 0, fs = 0;
+      for (let i = 0; i < L; i++){ const o = buf[idx]; fs = o * (1 - damp) + fs * damp; buf[idx] = (i < x.length ? x[i] : 0) + fs * g; idx = (idx + 1) % c; wet[i] += o / 6; }
+    }
+    for (const a0 of [556, 441]){
+      const a = Math.round(a0 * sc), buf = new Float32Array(a); let idx = 0;
+      for (let i = 0; i < L; i++){ const bi = buf[idx], o = -wet[i] + bi; buf[idx] = wet[i] + bi * .5; wet[i] = o; idx = (idx + 1) % a; }
+    }
+    const y = new Float32Array(L); y.set(x);
+    for (let i = 0; i < L; i++) y[i] = y[i] * (1 - p.revMix * .4) + wet[i] * p.revMix * 1.5;
+    x = y;
+  }
+  if (p.loop){ if (x.length > len) x = fold(x, len); }
+  else {
+    const t = peakOf(x) * 1e-3; let end = x.length; while (end > 1 && Math.abs(x[end - 1]) <= t) end--;
+    x = x.slice(0, Math.max(2, end));
+    const F = Math.min(220, x.length >> 1); for (let i = 0; i < F; i++) x[x.length - 1 - i] *= i / F;
+  }
+  const pk2 = peakOf(x), gain = pk2 > 0 ? (.89 * p.vol * 2) / pk2 : 0;
+  for (let i = 0; i < x.length; i++) x[i] = clamp(x[i] * gain, -1, 1);
+  return x;
+}
+
+/* ---------- WAV (PCM, optional smpl loop chunk for game engines) ---------- */
+function encodeWavBytes(samples, rate, bits, loop){
+  if (rate === 22050){ const h = new Float32Array(Math.max(1, samples.length >> 1)); for (let i = 0; i < h.length; i++) h[i] = (samples[2 * i] + (samples[2 * i + 1] ?? samples[2 * i])) / 2; samples = h; }
+  const bps = bits / 8, dataLen = samples.length * bps, pad = dataLen & 1, smpl = loop ? 68 : 0;
+  const buf = new ArrayBuffer(44 + dataLen + pad + smpl), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + dataLen + pad + smpl, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * bps, true); v.setUint16(32, bps, true); v.setUint16(34, bits, true);
+  w(36, 'data'); v.setUint32(40, dataLen, true);
+  let o = 44;
+  if (bits === 16) for (let i = 0; i < samples.length; i++, o += 2) v.setInt16(o, Math.round(clamp(samples[i], -1, 1) * 32767), true);
+  else for (let i = 0; i < samples.length; i++, o++) v.setUint8(o, Math.round(clamp(samples[i], -1, 1) * 127 + 128));
+  o += pad;
+  if (loop){
+    w(o, 'smpl'); v.setUint32(o + 4, 60, true); v.setUint32(o + 16, Math.round(1e9 / rate), true); v.setUint32(o + 20, 60, true);
+    v.setUint32(o + 36, 1, true); v.setUint32(o + 52, 0, true); v.setUint32(o + 56, samples.length - 1, true);
+  }
+  return new Uint8Array(buf);
+}
+
+/* ---------- Store-only ZIP writer ---------- */
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8){ let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZipBytes(files, date){
+  date = date || new Date();
+  const enc = new TextEncoder();
+  const time = (date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >> 1);
+  const day = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  const locals = [], centrals = []; let offset = 0, cdSize = 0;
+  for (const f of files){
+    const name = enc.encode(f.name), data = f.data, crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, time, true); h.setUint16(12, day, true); h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true);
+    h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    locals.push(new Uint8Array(h.buffer), name, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, time, true); c.setUint16(14, day, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true);
+    c.setUint16(28, name.length, true); c.setUint32(42, offset, true);
+    centrals.push(new Uint8Array(c.buffer), name);
+    offset += 30 + name.length + data.length; cdSize += 46 + name.length;
+  }
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+  e.setUint32(12, cdSize, true); e.setUint32(16, offset, true);
+  const parts = [...locals, ...centrals, new Uint8Array(e.buffer)], total = parts.reduce((a, b) => a + b.length, 0), out = new Uint8Array(total);
+  let pos = 0; for (const q of parts){ out.set(q, pos); pos += q.length; }
+  return out;
+}
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'sfx';
+function soundJSON(entry){ return {app: 'scifi-sfx-lab', version: 2, name: entry.name, preset: entry.preset || null, starred: !!entry.starred, params: sanitize(entry.params)}; }
+</script>
+<script>
+/* ===== UI ===== */
+'use strict';
+const $ = id => document.getElementById(id);
+const KEY = 'scifisfx.';
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(KEY + k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(KEY + k, JSON.stringify(v)); return true; }catch(e){ return false; } },
+};
+let P = sanitize(store.get('params', DEFAULTS));
+let soundName = store.get('name', 'Laser #1');
+let currentPreset = store.get('preset', 'laser');
+let currentId = null;
+const undoStack = [];
+let samples = null;
+
+function stamp(d = new Date()){ const z = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}`; }
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2000); }
+function persist(){ store.set('params', P); store.set('name', soundName); store.set('preset', currentPreset); }
+function nextName(base){ const n = store.get('counter', 0) + 1; store.set('counter', n); return `${base} #${n}`; }
+
+/* ---------- Audio (iOS unlock on first gesture) ---------- */
+const AC = window.AudioContext || window.webkitAudioContext;
+let ctx = null, src = null, playing = false;
+const isIOS = /iP(hone|ad|od)/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || /iPhone|iPad/.test(navigator.userAgent);
+const UNLOCK_EVENTS = ['touchend', 'pointerup', 'click', 'keydown'];
+function unlockAudio(){
+  try{
+    // Safari 17+: a 'playback' audio session plays even when the Ring/Silent switch is on silent.
+    if (navigator.audioSession){ try{ navigator.audioSession.type = 'playback'; }catch(e){} }
+    if (!ctx) ctx = new AC();
+    if (ctx.state !== 'running') ctx.resume();
+    const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start(0);
+  }catch(e){}
+  if (ctx && ctx.state === 'running') UNLOCK_EVENTS.forEach(t => document.removeEventListener(t, unlockAudio, true));
+}
+UNLOCK_EVENTS.forEach(t => document.addEventListener(t, unlockAudio, true));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); });
+
+function render(){ samples = synth(P); drawScope(); $('dur').textContent = (samples.length / SR).toFixed(2) + ' s' + (P.loop ? ' ⟳' : ''); $('name').textContent = soundName; }
+let rq = 0; function renderSoon(){ if (!rq) rq = requestAnimationFrame(() => { rq = 0; render(); }); }
+function stop(){ try{ src && src.stop(); }catch(e){} src = null; playing = false; updatePlayBtn(); }
+function play(){
+  unlockAudio();
+  if (rq){ cancelAnimationFrame(rq); rq = 0; render(); }
+  if (!samples) render();
+  if (!ctx) return;
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
+  stop();
+  const b = ctx.createBuffer(1, samples.length, SR); b.getChannelData(0).set(samples);
+  const s = ctx.createBufferSource(); s.buffer = b; s.loop = !!P.loop; s.connect(ctx.destination);
+  s.onended = () => { if (src === s){ src = null; playing = false; updatePlayBtn(); } };
+  s.start(); src = s; playing = true; updatePlayBtn();
+  maybeSilentHint();
+}
+function togglePlay(){ if (playing && P.loop) stop(); else play(); }
+function updatePlayBtn(){ const b = $('play'); const st = playing && P.loop; b.textContent = st ? '■ Stop' : '▶ Play'; b.classList.toggle('stop', st); }
+let hinted = false;
+function maybeSilentHint(){
+  if (hinted || !isIOS || navigator.audioSession || store.get('hide.iosHint', false)) return;
+  hinted = true; $('iosHint').classList.add('show');
+}
+
+/* ---------- Delivery: share sheet (iOS Files/AirDrop) or download ---------- */
+function wantShare(){ const m = $('method').value; return m === 'share' || (m === 'auto' && matchMedia('(pointer:coarse)').matches); }
+let lastUrl = null;
+async function deliver(blob, fname, t0){
+  if (wantShare() && navigator.canShare && typeof File === 'function'){
+    const file = new File([blob], fname, {type: blob.type});
+    let ok = false; try{ ok = navigator.canShare({files: [file]}); }catch(e){}
+    if (ok){
+      // iOS only allows share() right after a tap. After slow work, ask for one more tap.
+      if (t0 && performance.now() - t0 > 800){ showReady(blob, fname); return; }
+      try{ await navigator.share({files: [file], title: fname}); toast('Saved / shared'); return; }
+      catch(e){ if (e && e.name === 'AbortError') return; if (e && e.name === 'NotAllowedError'){ showReady(blob, fname); return; } }
+    }
+  }
+  download(blob, fname);
+}
+function showReady(blob, fname){
+  const b = $('readyBtn'); b.textContent = '⤓ Ready: tap to save ' + fname; b.classList.add('show');
+  b.onclick = () => { b.classList.remove('show'); deliver(blob, fname, performance.now()); };
+  b.scrollIntoView({block: 'center', behavior: 'smooth'}); toast('Ready: tap the green button to save');
+}
+function download(blob, fname){
+  if (lastUrl) URL.revokeObjectURL(lastUrl);
+  lastUrl = URL.createObjectURL(blob);
+  const a = $('dl'); a.href = lastUrl; a.download = fname; a.textContent = '⤓ ' + fname + ': tap here if the download didn’t start';
+  a.classList.add('show'); a.click(); toast('Downloading ' + fname);
+}
+function exportWav(){
+  const t0 = performance.now();
+  if (rq){ cancelAnimationFrame(rq); rq = 0; render(); }
+  if (!samples) render();
+  const bytes = encodeWavBytes(samples, +$('rate').value, +$('bits').value, !!P.loop);
+  deliver(new Blob([bytes], {type: 'audio/wav'}), `${slug(soundName)}-${stamp()}.wav`, t0);
+}
+function batchZip(){
+  const t0 = performance.now();
+  const id = $('batchPreset').value, n = +$('batchN').value, rate = +$('rate').value, bits = +$('bits').value, toLib = $('batchLib').checked;
+  const label = id === '__mutate' ? soundName.replace(/\s*#\d+\*?$|\*$/g, '') + ' mutations' : PRESETS[id].name;
+  const files = [], meta = [];
+  for (let i = 0; i < n; i++){
+    const params = id === '__mutate' ? mutate(P) : generate(id);
+    const s = synth(params), nm = `${slug(label)}-${String(i + 1).padStart(2, '0')}`;
+    files.push({name: nm + '.wav', data: encodeWavBytes(s, rate, bits, !!params.loop)});
+    meta.push({...soundJSON({name: nm, preset: id === '__mutate' ? currentPreset : id, params}), file: nm + '.wav', seconds: +(s.length / SR).toFixed(3)});
+    if (toLib) addEntry(params, `${label} ${i + 1}`, id === '__mutate' ? currentPreset : id, false, true);
+  }
+  files.push({name: 'params.json', data: new TextEncoder().encode(JSON.stringify({app: 'scifi-sfx-lab', version: 2, sounds: meta}, null, 2))});
+  if (toLib) saveLib();
+  const blob = new Blob([makeZipBytes(files)], {type: 'application/zip'});
+  toast(`Rendered ${n} variations in ${Math.round(performance.now() - t0)} ms`);
+  deliver(blob, `${slug(label)}-x${n}-${stamp()}.zip`, t0);
+}
+
+/* ---------- Library (localStorage) ---------- */
+let lib = loadLib(), libFilter = 'all', libShowAll = false;
+function loadLib(){ const a = store.get('library', []); return Array.isArray(a) ? a.filter(e => e && e.params && e.id).map(e => ({...e, params: sanitize(e.params)})) : []; }
+function saveLib(){
+  const un = lib.filter(e => !e.starred);
+  if (un.length > 60){ const keep = new Set(un.slice(0, 60).map(e => e.id)); lib = lib.filter(e => e.starred || keep.has(e.id)); }
+  if (!store.set('library', lib)) toast('Storage full: delete some sounds');
+  renderLib();
+}
+function addEntry(params, name, preset, starred = false, defer = false){
+  const e = {id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), name, preset: preset || null, params: sanitize(params), starred: !!starred, created: Date.now()};
+  lib.unshift(e); if (!defer) saveLib(); return e;
+}
+function fmtTime(t){ const d = new Date(t); return d.toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) + ' ' + d.toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}); }
+function renderLib(){
+  const list = $('libList'), items = lib.filter(e => libFilter === 'all' || e.starred);
+  $('libCount').textContent = `${lib.length} sounds · ${lib.filter(e => e.starred).length} ★`;
+  list.textContent = '';
+  if (!items.length){ list.innerHTML = `<div class="empty">${libFilter === 'all' ? 'Nothing yet. Generate a sound.' : 'No starred sounds yet. Tap ☆ on one.'}</div>`; return; }
+  const shown = libShowAll ? items : items.slice(0, 25);
+  for (const e of shown){
+    const row = document.createElement('div'); row.className = 'lib-row' + (e.id === currentId ? ' cur' : '');
+    const pre = e.preset && PRESETS[e.preset] ? PRESETS[e.preset].name : 'Custom';
+    row.innerHTML = `<button class="star" aria-pressed="${e.starred}" aria-label="Star">${e.starred ? '★' : '☆'}</button>
+      <button class="lib-name"><b></b><small>${pre} · ${WAVES[e.params.wave]}${e.params.loop ? ' · loop' : ''} · ${fmtTime(e.created)}</small></button>
+      <button class="ren" aria-label="Rename">✎</button><button class="js" aria-label="Save params as JSON">⤓</button><button class="del" aria-label="Delete">🗑</button>`;
+    row.querySelector('b').textContent = e.name;
+    row.querySelector('.lib-name').onclick = () => recall(e);
+    row.querySelector('.star').onclick = () => { e.starred = !e.starred; saveLib(); };
+    row.querySelector('.ren').onclick = () => { const n = prompt('Rename sound', e.name); if (n && n.trim()){ e.name = n.trim().slice(0, 80); if (e.id === currentId){ soundName = e.name; persist(); $('name').textContent = soundName; } saveLib(); } };
+    row.querySelector('.js').onclick = () => deliver(new Blob([JSON.stringify(soundJSON(e), null, 2)], {type: 'application/json'}), slug(e.name) + '.json', performance.now());
+    row.querySelector('.del').onclick = () => { if (e.starred && !confirm(`Delete starred “${e.name}”?`)) return; lib = lib.filter(x => x !== e); if (currentId === e.id) currentId = null; saveLib(); };
+    list.appendChild(row);
+  }
+  if (items.length > shown.length){
+    const b = document.createElement('button'); b.className = 'btn'; b.style.width = '100%'; b.textContent = `Show all ${items.length}`;
+    b.onclick = () => { libShowAll = true; renderLib(); }; list.appendChild(b);
+  }
+}
+function recall(e){ setAll(e.params, e.name, {preset: e.preset, history: false, id: e.id}); toast('Recalled ' + e.name); }
+function importText(text){
+  let data; try{ data = JSON.parse(text); }catch(e){ toast('Not valid JSON'); return; }
+  const list = Array.isArray(data) ? data : Array.isArray(data.sounds) ? data.sounds : [data];
+  const added = [];
+  for (const it of list){
+    if (!it || typeof it !== 'object') continue;
+    const params = it.params || (('base' in it || 'wave' in it) ? it : null); if (!params) continue;
+    added.push(addEntry(params, String(it.name || 'Imported').slice(0, 80), it.preset && PRESETS[it.preset] ? it.preset : null, !!it.starred, true));
+  }
+  if (!added.length){ toast('No sounds found in that JSON'); return; }
+  saveLib(); recall(added[added.length - 1]); toast(`Imported ${added.length} sound${added.length > 1 ? 's' : ''}`);
+}
+
+/* ---------- State changes ---------- */
+function pushUndo(){ undoStack.push({p: {...P}, n: soundName, pr: currentPreset, id: currentId}); if (undoStack.length > 60) undoStack.shift(); $('undo').disabled = false; }
+function undo(){ const u = undoStack.pop(); if (!u) return; P = u.p; soundName = u.n; currentPreset = u.pr; currentId = u.id; $('undo').disabled = !undoStack.length; syncUI(); render(); persist(); renderLib(); play(); }
+function setAll(p, name, opts = {}){
+  pushUndo(); P = sanitize(p); soundName = name; currentPreset = opts.preset || null;
+  currentId = opts.history === false ? (opts.id || null) : addEntry(P, name, currentPreset).id;
+  if (currentPreset) $('batchPreset').value = currentPreset;
+  syncUI(); render(); persist(); renderLib(); play();
+}
+function genPreset(id){ setAll(generate(id), nextName(PRESETS[id].name), {preset: id}); }
+function doRandom(){ setAll(randomize(), nextName('Random'), {preset: null}); }
+function doMutate(){ setAll(mutate(P), soundName.endsWith('*') ? soundName : soundName + '*', {preset: currentPreset}); }
+function saveToLib(){
+  const n = prompt('Save to library as', soundName.replace(/\*$/, '')); if (n === null) return;
+  const e = addEntry(P, (n.trim() || soundName).slice(0, 80), currentPreset, true); currentId = e.id; soundName = e.name; persist(); render(); renderLib();
+  $('libSec').open = true; toast('Saved ★ ' + e.name);
+}
+
+/* ---------- Build controls ---------- */
+const groups = {'Sci-Fi': $('presets-scifi'), 'Retro': $('presets-retro'), 'Movement': $('presets-move'), 'Impacts': $('presets-impact')};
+const bp = $('batchPreset');
+const og = {'Sci-Fi': document.createElement('optgroup'), 'Retro': document.createElement('optgroup'), 'Movement': document.createElement('optgroup'), 'Impacts': document.createElement('optgroup')};
+og['Sci-Fi'].label = 'Sci-Fi'; og['Retro'].label = 'Retro'; og['Movement'].label = 'Movement'; og['Impacts'].label = 'Impacts';
+for (const id in PRESETS){
+  const pr = PRESETS[id], b = document.createElement('button');
+  b.className = 'btn'; b.textContent = pr.label; b.setAttribute('aria-label', pr.name); b.onclick = () => genPreset(id);
+  groups[pr.group].appendChild(b);
+  const o = document.createElement('option'); o.value = id; o.textContent = pr.name; og[pr.group].appendChild(o);
+}
+bp.append(og['Sci-Fi'], og['Retro'], og['Movement'], og['Impacts']);
+{ const o = document.createElement('option'); o.value = '__mutate'; o.textContent = 'Mutations of current sound'; bp.appendChild(o); }
+if (currentPreset && PRESETS[currentPreset]) bp.value = currentPreset;
+$('randomBtn').onclick = doRandom; $('mutateBtn').onclick = doMutate; $('saveLibBtn').onclick = saveToLib;
+
+WAVES.forEach((w, i) => {
+  const b = document.createElement('button'); b.textContent = w; b.dataset.w = i;
+  b.onclick = () => { pushUndo(); P.wave = i; syncUI(); render(); persist(); play(); }; $('waves').appendChild(b);
+});
+
+const desktop = matchMedia('(min-width:900px)').matches;
+const inputs = {}, secs = [];
+SECTIONS.forEach(([title, sub, params], si) => {
+  const d = document.createElement('details'); d.className = 'sec';
+  if (desktop || si < 2) d.open = true;
+  d.innerHTML = `<summary>${title} <span class="fxon" aria-hidden="true"></span><small>${sub}</small></summary><div class="body"></div>`;
+  const body = d.querySelector('.body');
+  params.forEach(([key, label, signed, kind]) => {
+    const row = document.createElement('div'); row.className = 'row'; row.dataset.key = key;
+    const id = 's_' + key;
+    row.innerHTML = `<div class="top"><label for="${id}">${label}</label><output id="o_${key}"></output><button class="reset" aria-label="Reset ${label}">↺</button></div>
+      <input type="range" id="${id}" min="${signed ? -1 : 0}" max="1" step="0.001">`;
+    const inp = row.querySelector('input'); let dragging = false;
+    inp.addEventListener('input', () => { if (!dragging){ pushUndo(); dragging = true; } P[key] = +inp.value; paint(inp, key, kind); markSecs(); renderSoon(); persist(); });
+    inp.addEventListener('change', () => { dragging = false; if ($('autoplay').checked) play(); });
+    row.querySelector('.reset').onclick = () => { pushUndo(); P[key] = DEFAULTS[key]; syncUI(); render(); persist(); if ($('autoplay').checked) play(); };
+    inputs[key] = {inp, kind}; body.appendChild(row);
+  });
+  if (title === 'Output'){
+    const row = document.createElement('div'); row.className = 'row';
+    row.innerHTML = `<label class="toggle" style="display:flex"><input type="checkbox" id="loopChk"> Loop-friendly (seamless loop + WAV loop points)</label>`;
+    body.appendChild(row);
+  }
+  secs.push({el: d, keys: params.map(p => p[0])});
+  $('sliders').appendChild(d);
+});
+$('loopChk').addEventListener('change', e => { pushUndo(); P.loop = e.target.checked ? 1 : 0; if (!P.loop) stop(); syncUI(); render(); persist(); play(); });
+function paint(inp, key, kind){
+  const min = +inp.min, pct = (inp.value - min) / (1 - min) * 100; inp.style.setProperty('--p', pct + '%');
+  $('o_' + key).textContent = fmt(key, +inp.value, kind);
+}
+function markSecs(){ secs.forEach(s => s.el.classList.toggle('active', s.keys.some(k => Math.abs(P[k] - DEFAULTS[k]) > 1e-3))); }
+function syncUI(){
+  for (const k in inputs){ inputs[k].inp.value = P[k]; paint(inputs[k].inp, k, inputs[k].kind); }
+  document.querySelectorAll('#waves button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.w === P.wave)));
+  document.querySelectorAll('.row[data-key="duty"],.row[data-key="dutyRamp"]').forEach(r => r.classList.toggle('dim', P.wave !== 0));
+  $('loopChk').checked = !!P.loop; markSecs(); updatePlayBtn();
+}
+
+/* Waveform preview */
+function drawScope(){
+  const c = $('scope'), dpr = Math.min(3, window.devicePixelRatio || 1), w = c.clientWidth, h = c.clientHeight;
+  if (!w) return;
+  c.width = w * dpr; c.height = h * dpr; const g = c.getContext('2d'); g.scale(dpr, dpr);
+  g.clearRect(0, 0, w, h); g.strokeStyle = '#0f2238'; g.lineWidth = 1;
+  for (let x = 0; x < w; x += 24){ g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, h); g.stroke(); }
+  g.strokeStyle = '#1d3350'; g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke();
+  if (!samples) return;
+  g.fillStyle = '#28f0ff'; g.shadowColor = '#28f0ff'; g.shadowBlur = 6; const step = samples.length / w;
+  for (let x = 0; x < w; x++){
+    let mn = 1, mx = -1; const a = (x * step) | 0, b = Math.min(samples.length, Math.max(a + 1, ((x + 1) * step) | 0));
+    for (let i = a; i < b; i++){ const s = samples[i]; if (s < mn) mn = s; if (s > mx) mx = s; }
+    if (mn > mx){ mn = mx = 0; }
+    g.fillRect(x, h / 2 - mx * h / 2 * .95, 1, Math.max(1, (mx - mn) * h / 2 * .95));
+  }
+}
+$('scope').addEventListener('click', togglePlay);
+addEventListener('resize', () => drawScope());
+
+$('play').onclick = togglePlay; $('export').onclick = exportWav; $('undo').onclick = undo; $('batchBtn').onclick = batchZip;
+$('helpBtn').onclick = () => { const d = $('help'); d.showModal ? d.showModal() : d.setAttribute('open', ''); };
+$('tabAll').onclick = () => { libFilter = 'all'; $('tabAll').setAttribute('aria-pressed', 'true'); $('tabStar').setAttribute('aria-pressed', 'false'); renderLib(); };
+$('tabStar').onclick = () => { libFilter = 'star'; $('tabStar').setAttribute('aria-pressed', 'true'); $('tabAll').setAttribute('aria-pressed', 'false'); renderLib(); };
+$('importBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = async e => { const f = e.target.files[0]; if (f) importText(await f.text()); e.target.value = ''; };
+$('pasteBtn').onclick = async () => {
+  let t = ''; try{ if (navigator.clipboard && navigator.clipboard.readText) t = await navigator.clipboard.readText(); }catch(e){}
+  if (!t || !t.trim().startsWith('{') && !t.trim().startsWith('[')) t = prompt('Paste sound JSON') || '';
+  if (t.trim()) importText(t);
+};
+$('exportLibBtn').onclick = () => deliver(new Blob([JSON.stringify({app: 'scifi-sfx-lab', version: 2, sounds: lib.map(soundJSON)}, null, 2)], {type: 'application/json'}), `scifi-sfx-library-${stamp()}.json`, performance.now());
+$('clearHistBtn').onclick = () => { const n = lib.filter(e => !e.starred).length; if (n && confirm(`Delete ${n} unstarred sounds?`)){ lib = lib.filter(e => e.starred); saveLib(); } };
+document.querySelectorAll('[data-dismiss]').forEach(b => b.onclick = () => { const id = b.dataset.dismiss; $(id).classList.remove('show'); store.set('hide.' + id, true); });
+['rate', 'bits', 'method', 'autoplay', 'batchN', 'batchLib'].forEach(id => {
+  const el = $(id), v = store.get('opt.' + id, null);
+  if (v !== null){ if (el.type === 'checkbox') el.checked = !!v; else el.value = v; }
+  el.addEventListener('change', () => store.set('opt.' + id, el.type === 'checkbox' ? el.checked : el.value));
+});
+
+/* Desktop-only keyboard shortcuts (touch use never needs them) */
+const sciIds = Object.keys(PRESETS).filter(id => PRESETS[id].group === 'Sci-Fi');
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.altKey) return;
+  const t = e.target; if (t && (t.tagName === 'SELECT' || t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.type !== 'range' && t.type !== 'checkbox'))) return;
+  if ($('help').open) return;
+  if (e.ctrlKey){ if (e.key.toLowerCase() === 'z'){ e.preventDefault(); undo(); } return; }
+  const k = e.key.toLowerCase();
+  if (k === ' ' || k === 'p'){ if (t && t.tagName === 'BUTTON' && k === ' ') return; e.preventDefault(); togglePlay(); }
+  else if (k === 'e'){ e.preventDefault(); exportWav(); }
+  else if (k === 'b'){ e.preventDefault(); batchZip(); }
+  else if (k === 'r') doRandom();
+  else if (k === 'm') doMutate();
+  else if (k === 's'){ e.preventDefault(); saveToLib(); }
+  else if (k === 'z') undo();
+  else if (k === 'w'){ pushUndo(); P.wave = (P.wave + 1) % 4; syncUI(); render(); persist(); play(); }
+  else if (/^[0-9]$/.test(k)){ const id = sciIds[(+k + 9) % 10]; if (id) genPreset(id); }
+});
+
+/* Install: iOS has no install prompt, so show the Add to Home Screen tip. Other browsers get an Install button. */
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+if (isIOS && !standalone && !store.get('hide.a2hsHint', false)) $('a2hsHint').classList.add('show');
+let deferredPrompt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('installBtn').hidden = false; });
+$('installBtn').onclick = async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice.catch(() => {}); deferredPrompt = null; $('installBtn').hidden = true; };
+addEventListener('appinstalled', () => { $('installBtn').hidden = true; });
+
+/* Service worker: needs a real same-origin sw.js over https (or localhost); skipped for file:// */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))){
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
+syncUI(); render(); renderLib();
+</script>
+</body>
+</html>
