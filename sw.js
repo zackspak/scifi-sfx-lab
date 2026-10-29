@@ -1,5 +1,5 @@
 /* Sci-Fi SFX Lab service worker: offline app shell. Bump VERSION when index.html changes. */
-const VERSION = 'scifi-sfx-lab-v4';
+const VERSION = 'scifi-sfx-lab-v5';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', (e) => {

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sci-Fi SFX Lab</title>
-<meta name="description" content="Sci-fi, retro, movement (whoosh, jump, dash) and impact (metal, dirt, leaves, hollow, player hit) game sound-effect generator and editor with WAV and batch ZIP export. Works offline.">
+<meta name="description" content="Sci-fi, retro, movement (whoosh, jump, dash) and impact (metal, dirt, leaves, hollow, player hit) and Mr. Horns sound-identity game sound-effect generator and editor with WAV and batch ZIP export. Works offline.">
 <meta name="theme-color" content="#05070d">
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="manifest.json">
@@ -18,7 +18,7 @@
 <style>
 :root{
   --bg:#05070d; --panel:#0b1220; --panel2:#111c30; --line:#1d3350; --text:#e3f4ff; --muted:#7f9bb8;
-  --accent:#28f0ff; --accent-ink:#00161a; --mag:#ff3cc8; --ok:#4dffa6; --warn:#ffc94d; --imp:#ff8a3d; --tap:48px; --radius:14px;
+  --accent:#28f0ff; --accent-ink:#00161a; --mag:#ff3cc8; --ok:#4dffa6; --warn:#ffc94d; --imp:#ff8a3d; --sid:#ffd23f; --tap:48px; --radius:14px;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -44,6 +44,19 @@ main{padding:0 12px calc(108px + env(safe-area-inset-bottom));max-width:1180px;m
 .card h2.mag{color:var(--mag)}
 .card h2.ok{color:var(--ok)}
 .card h2.imp{color:var(--imp)}
+.card h2.sid{color:var(--sid)}
+.card h2 small{font:500 11px var(--mono);letter-spacing:.5px;text-transform:none;color:var(--muted);margin-left:6px}
+.btn.sid{border-color:#5b4a14;background:#1c1806}
+.btn.sid:active{border-color:var(--sid);box-shadow:0 0 12px rgba(255,210,63,.35)}
+details.sub{border-top:1px solid #2a2510}
+details.sub>summary{list-style:none;min-height:48px;display:flex;align-items:center;gap:8px;font:700 13px var(--mono);letter-spacing:1px;text-transform:uppercase;color:var(--sid);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+details.sub>summary::-webkit-details-marker{display:none}
+details.sub>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--sid);border-bottom:2px solid var(--sid);transform:rotate(45deg);transition:transform .15s;flex:none}
+details.sub[open]>summary::after{transform:rotate(-135deg)}
+details.sub>summary small{color:var(--muted);font:500 12px var(--mono);letter-spacing:0;text-transform:none}
+details.sub>.grid{margin-bottom:12px}
+.notes-inp{width:100%;min-height:var(--tap);border-radius:12px;border:1px solid var(--line);background:#02050a;color:var(--text);padding:0 12px;font:16px var(--mono);margin:4px 0}
+.notes-inp:focus{outline:none;border-color:var(--accent)}
 #scope{display:block;width:100%;height:110px;border-radius:10px;background:#02050a;border:1px solid #0f2238;touch-action:manipulation}
 .meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font:13px var(--mono);margin-top:6px}
 .meta #name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -53,8 +66,8 @@ main{padding:0 12px calc(108px + env(safe-area-inset-bottom));max-width:1180px;m
 .btn.mag{border-color:#5a1f52;background:#1d0f24}
 .btn.wide{grid-column:span 3}
 .btn.cy{border-color:#14606a;background:#06262b;color:var(--accent)}
-.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.seg button{min-height:var(--tap);border-radius:12px;border:1px solid var(--line);background:var(--panel2);font-weight:650;font-size:15px}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.seg button{min-height:var(--tap);border-radius:12px;border:1px solid var(--line);background:var(--panel2);font-weight:650;font-size:14px;padding:0 2px;min-width:0}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 14px rgba(40,240,255,.4)}
 details.sec{overflow:hidden}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;gap:10px;padding:0 14px;font:700 15px var(--mono);letter-spacing:.5px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
@@ -169,6 +182,12 @@ kbd{background:#02050a;border:1px solid var(--line);border-bottom-width:2px;bord
       </div>
     </div>
 
+    <div class="card" id="sidCard">
+      <h2 class="sid">Sound Identity <small>Mr. Horns audio logo</small></h2>
+      <div id="presets-sid"></div>
+      <p class="note">Every piece of the four Mr. Horns stings, plus a horn family (BWAH = Bb3, BAH = Eb4). These are fixed brand sounds: use Mutate for variations. On full stings the sliders edit the horn; the other layers ride along.</p>
+    </div>
+
     <div class="card">
       <h2>Wave</h2>
       <div class="seg" id="waves" role="group" aria-label="Wave type"></div>
@@ -233,6 +252,8 @@ kbd{background:#02050a;border:1px solid var(--line);border-bottom-width:2px;bord
   <h3>Sci-Fi SFX Lab</h3>
   <ul>
     <li>Tap a <b>Sci-Fi</b>, <b>Retro</b>, <b>Movement</b> (whooshes, jumps, dashes) or <b>Impacts</b> (metal, dirt, leaves, hollow, player hit) button. Each tap rolls a fresh random variation of that type. Then tweak the sliders, and tap the waveform or <b>Play</b> to hear it.</li>
+    <li><b>Sound Identity</b>: every component of the Mr. Horns audio-logo stings (Arcade, Botanical, Meltdown, Field Guide), the four full stings, and a <b>Horn family</b> (1, 2 and 3-note horns in six timbres).</li>
+    <li><b>Notes</b> turns any sound into a melody: type notes like <kbd>Bb3 Eb4</kbd> (BWAH-BAH), <kbd>Bb3 Bb3 Eb4:2</kbd>, or semitones from the start frequency like <kbd>0 5 7</kbd>. <kbd>r</kbd> = rest, <kbd>:2</kbd> = two steps long. The last note holds. Clear the box to turn it off. <b>Layers</b> add a detuned unison, an octave and a sub-octave for fatter horns.</li>
     <li><b>Metal ring</b> adds struck-material resonance (inharmonic partials for metal, low values for wood/hollow knocks). Off by default.</li>
     <li><b>Engine ⟳</b> sounds are loop-friendly: playback loops (tap Stop to end) and the WAV carries loop points. Turn <b>Loop</b> on in Output for any sound.</li>
     <li><b>Save WAV</b> opens the share sheet on iPhone: pick <b>Save to Files</b> or <b>AirDrop</b>. On computers it downloads.</li>
@@ -248,11 +269,13 @@ kbd{background:#02050a;border:1px solid var(--line);border-bottom-width:2px;bord
 /* ===== Sci-Fi SFX Lab engine (pure, no DOM). Also loaded by Node for tests. ===== */
 'use strict';
 const SR = 44100;
-const WAVES = ['Square', 'Saw', 'Sine', 'Noise'];
+const WAVES = ['Square', 'Saw', 'Sine', 'Noise', 'Tri'];
 // [key, label, signed?, formatter]
 const SECTIONS = [
   ['Envelope', 'ADSR + length', [['length','Length',0,'len'],['attack','Attack'],['decay','Decay'],['susLevel','Sustain level'],['hold','Sustain time'],['release','Release'],['punch','Punch']]],
   ['Pitch', 'start & slide', [['base','Start frequency',0,'hz'],['limit','Min freq cutoff',0,'hzoff'],['ramp','Slide',1],['dramp','Delta slide',1]]],
+  ['Notes', 'melody / horn', [['noteLen','Note length',0,'notelen'],['noteGap','Gap between notes',0,'off'],['scoop','Pitch scoop',0,'scoop'],['noteAccent','Note accent',0,'off']]],
+  ['Layers', 'unison / octave / sub', [['uniMix','Unison osc',0,'off'],['uniDetune','Unison detune',0,'cents'],['octMix','Octave up',0,'off'],['subMix','Sub octave (tri)',0,'off']]],
   ['Vibrato', 'wobble', [['vibDepth','Depth'],['vibSpeed','Speed']]],
   ['Arpeggio', 'pitch jump', [['arpMod','Jump amount',1],['arpSpeed','Jump speed']]],
   ['Duty', 'square only', [['duty','Duty cycle'],['dutyRamp','Duty sweep',1]]],
@@ -271,7 +294,9 @@ const DEFAULTS = {wave:0, base:.3, limit:0, ramp:0, dramp:0, vibDepth:0, vibSpee
   repeat:0, phaOffset:0, phaRamp:0, lpf:1, lpfRamp:0, lpfBend:0, lpfRes:0, hpf:0, hpfRamp:0,
   length:.5, attack:0, decay:0, susLevel:1, hold:.3, release:.4, punch:0,
   ringMix:0, ringFreq:.5, ringDecay:.4, ringSpread:.8,
-  crushBits:0, crushRate:0, drive:0, delayTime:.3, delayFb:.3, delayMix:0, revSize:.5, revMix:0, vol:.5, loop:0};
+  crushBits:0, crushRate:0, drive:0, delayTime:.3, delayFb:.3, delayMix:0, revSize:.5, revMix:0, vol:.5, loop:0,
+  // Notes + Layers (added for Sound Identity). Inert at these defaults: no notes string and zero layer mix = classic sfxr voice.
+  noteLen:.3, noteGap:0, scoop:0, noteAccent:0, uniMix:0, uniDetune:.3, octMix:0, subMix:0};
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const frnd = x => Math.random() * x;
 const rnd = n => Math.floor(Math.random() * (n + 1));
@@ -282,13 +307,56 @@ const lenMul = v => Math.pow(2, v * 4 - 2);
 const baseHz = b => 3528 * (b * b + .001);
 const ringHz = v => 80 * Math.pow(2, v * 6);          // 80 Hz .. 5.1 kHz
 const ringT60 = v => .03 + v * v * 2.5;               // seconds
+const noteSec = v => .015 + v * v * .6;               // seconds per note step (x Length)
+// Param helpers: real-world units -> slider values (used by the Sound Identity presets)
+const U = {
+  base: hz => Math.sqrt(Math.max(0, hz / 3528 - .001)),
+  env: s => Math.sqrt(Math.max(0, s) * SR / 1e5),
+  step: s => Math.sqrt(Math.max(0, s - .015) / .6),
+  lpf: hz => Math.cbrt(Math.pow(hz / 56150, 2) / .1),
+  hpf: hz => Math.sqrt(hz * 2 * Math.PI / (SR * 8) / .1),
+  delay: s => (s - .02) / .58,
+  ringF: hz => Math.log2(hz / 80) / 6,
+  ringT: s => Math.sqrt(Math.max(0, s - .03) / 2.5),
+  vib: hz => Math.sqrt(2 * Math.PI * hz / SR / .01),
+};
+/* Note sequence: space-separated tokens. Bb3 / F#5 = absolute note; 0, +5, -12 = semitones from Start frequency; r = rest.
+   Optional :n suffix = length in steps (e.g. Eb4:2). The last note holds until the envelope ends. */
+const NOTE_RE = /^(?:([A-Ga-g])([#b]?)(-?\d)|([+-]?\d{1,2}(?:\.\d+)?)|(r|R|-|_))(?::(\d{1,2}(?:\.\d+)?))?$/;
+const PC = {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11};
+function cleanNotes(str){
+  const out = [];
+  for (const tok of String(str || '').trim().split(/[\s,]+/)){
+    const m = tok.match(NOTE_RE); if (!m || out.length >= 64) continue;
+    const dur = m[6] !== undefined ? ':' + +clamp(+m[6], .1, 16).toFixed(2) : '';
+    out.push((m[1] ? m[1].toUpperCase() + m[2] + m[3] : m[4] !== undefined ? m[4] : 'r') + dur);
+  }
+  return out.join(' ');
+}
+function parseNotes(str, basePer){
+  return cleanNotes(str).split(' ').filter(Boolean).map(tok => {
+    const m = tok.match(NOTE_RE), steps = m[6] !== undefined ? +m[6] : 1;
+    if (m[1]){ const midi = 12 * (+m[3] + 1) + PC[m[1].toUpperCase()] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+      return {per: SR * 8 / (440 * Math.pow(2, (midi - 69) / 12)), steps}; }
+    if (m[4] !== undefined) return {per: basePer / Math.pow(2, +m[4] / 12), steps};
+    return {per: 0, steps};                                   // rest
+  });
+}
 
 function sanitize(p){
   const o = {};
   for (const k in DEFAULTS){
     let v = p && p[k] !== undefined ? +p[k] : DEFAULTS[k];
     if (!Number.isFinite(v)) v = DEFAULTS[k];
-    o[k] = (k === 'wave') ? clamp(Math.round(v), 0, 3) : (k === 'loop') ? (v ? 1 : 0) : clamp(v, SIGNED.has(k) ? -1 : 0, 1);
+    o[k] = (k === 'wave') ? clamp(Math.round(v), 0, WAVES.length - 1) : (k === 'loop') ? (v ? 1 : 0) : clamp(v, SIGNED.has(k) ? -1 : 0, 1);
+  }
+  // Optional extras, only present when used (so classic sounds' JSON is unchanged)
+  const nt = p && typeof p.notes === 'string' ? cleanNotes(p.notes) : ''; if (nt) o.notes = nt;
+  const st = p && p.stack, num = (x, d, a, b) => { x = +x; return clamp(Number.isFinite(x) ? x : d, a, b); };
+  if (st && Array.isArray(st.layers)){
+    const layers = st.layers.filter(l => l && typeof l.params === 'object').slice(0, 16)
+      .map(l => ({at: num(l.at, 0, 0, 10), gain: num(l.gain, 1, 0, 2), params: sanitize({...l.params, stack: undefined})}));
+    if (layers.length) o.stack = {at: num(st.at, 0, 0, 10), gain: num(st.gain, 1, 0, 2), revSize: num(st.revSize, .5, 0, 1), revMix: num(st.revMix, 0, 0, 1), layers};
   }
   return o;
 }
@@ -303,6 +371,9 @@ function fmt(key, v, kind){
     case 'off': return v === 0 ? 'off' : v.toFixed(2);
     case 'ringhz': return Math.round(ringHz(v)) + ' Hz';
     case 'ringt': return ringT60(v).toFixed(2) + ' s';
+    case 'notelen': return Math.round(noteSec(v) * 1000) + ' ms';
+    case 'scoop': return v === 0 ? 'off' : '−' + (v * 6).toFixed(1) + ' st';
+    case 'cents': return (50 * v * v).toFixed(1) + ' ¢';
     default: return v.toFixed(2);
   }
 }
@@ -497,8 +568,96 @@ const IMPACT = [
     p.ringMix = r(.3, .38); p.ringFreq = r(.05, .1); p.ringDecay = r(.13, .17); p.ringSpread = r(0, .15);
     p.drive = r(.55, .7); if (chance(.5)) p.crushRate = r(.18, .28); p.revMix = r(.05, .1); p.revSize = .2; return p; }],
 ];
+// Sound Identity: Mr. Horns audio-logo drafts broken into their component sounds (ported from mrhorns-sonic/src/synth.py).
+// Fixed (not randomized) so they match the brand drafts; use Mutate for variations. Real-world values go through U.* helpers.
+const SP = o => Object.assign(D(), o);
+const envFor = (total, att = 0, rel = .2) => ({attack: U.env(att), hold: U.env(Math.max(0, total - att - rel)), release: U.env(rel)});
+// The constant: horn motif. 1 note = BAH (Eb4, held); 2 = BWAH (Bb3, scooped, short) -> BAH; 3 = BWAH-BWAH-BAH.
+const HORN_NOTES = {1: 'Eb4', 2: 'Bb3 Eb4', 3: 'Bb3 Bb3 Eb4'};
+const HORN_TIMBRE = {
+  // branch horns (faithful to the drafts)
+  arcade:    {wave: 0, duty: .5, octMix: .64, subMix: .23, scoop: .58, noteAccent: .25, vibDepth: .014, vibSpeed: U.vib(5.5), revMix: .1, revSize: .2, rel: .2},
+  botanical: {wave: 1, uniMix: .8, uniDetune: .33, subMix: .6, lpf: U.lpf(1900), lpfRes: .45, lpfRamp: -.03, scoop: .58, noteAccent: .3, vibDepth: .014, vibSpeed: U.vib(5.5), revMix: .15, revSize: .35, att: .008, rel: .2},
+  midnight:  {wave: 1, uniMix: 1, uniDetune: .58, octMix: .6, subMix: .5, lpf: U.lpf(2600), lpfRes: .35, lpfRamp: -.03, drive: .35, scoop: .58, noteAccent: .2, vibDepth: .014, vibSpeed: U.vib(5.5), revMix: .22, revSize: .6, att: .006, rel: .22},
+  field:     {wave: 4, subMix: .4, lpf: U.lpf(1400), scoop: .58, noteAccent: .35, vibDepth: .014, vibSpeed: U.vib(5.5), revMix: .3, revSize: .65, att: .035, rel: .38},
+  // horn family
+  chip:  {wave: 0, duty: .5, octMix: .25, crushBits: .55, scoop: .3, noteAccent: .3, gap: .25, delayMix: .2, delayTime: U.delay(.11), delayFb: .3, rel: .12},
+  brass: {wave: 1, uniMix: .7, uniDetune: .45, subMix: .3, lpf: U.lpf(1600), lpfRes: .3, lpfRamp: -.02, drive: .12, scoop: .7, noteAccent: .3, vibDepth: .02, vibSpeed: U.vib(5.5), revMix: .18, revSize: .45, att: .025, rel: .22},
+  grit:  {wave: 1, uniMix: 1, uniDetune: .7, octMix: .5, subMix: .6, lpf: U.lpf(3200), lpfRes: .5, drive: .6, crushRate: .12, scoop: .5, noteAccent: .2, revMix: .2, revSize: .5, att: .005, rel: .2},
+  soft:  {wave: 4, subMix: .5, lpf: U.lpf(1100), scoop: .4, noteAccent: .3, vibDepth: .015, vibSpeed: U.vib(5), revMix: .35, revSize: .75, att: .05, rel: .45},
+  kazoo: {wave: 0, duty: .8, lpf: U.lpf(1500), lpfRes: .55, hpf: U.hpf(250), vibDepth: .035, vibSpeed: U.vib(6.5), scoop: .6, noteAccent: .15, revMix: .1, revSize: .3, att: .015, rel: .18},
+  stack: {wave: 1, uniMix: 1, uniDetune: .8, octMix: .7, subMix: .7, lpf: U.lpf(2400), lpfRes: .25, phaOffset: .12, phaRamp: .05, drive: .2, scoop: .5, noteAccent: .25, revMix: .25, revSize: .6, att: .006, rel: .25},
+};
+function hornP(timbre, count = 2){
+  const {att = 0, rel = .2, gap, ...t} = HORN_TIMBRE[timbre];
+  const step = count === 3 ? .18 : .26, held = .85, total = (count - 1) * step + held;
+  return SP({base: U.base(count === 1 ? 311.13 : 233.08), notes: HORN_NOTES[count], noteLen: U.step(step),
+    noteGap: gap !== undefined ? gap : (count === 3 ? .035 : .04) / step, ...envFor(total, att, rel), ...t});
+}
+// ---- Arcade Impact ----
+const arcPowerup = () => SP({wave: 0, duty: .25, base: U.base(311.13), notes: 'Eb4 F4 G4 Ab4 Bb4 C5 D5 Eb5 F5 G5 Ab5 Bb5', noteLen: U.step(.033),
+  noteGap: .3, noteAccent: .5, ...envFor(.41, 0, .05), delayMix: .3, delayTime: U.delay(.07), delayFb: .33});
+const arcCoin = (notes = 'B5:1.1 E6:2.9 Eb6 G6 Bb6 Eb7 G7', echo = .35) => SP({wave: 0, base: U.base(987.77), notes, noteLen: U.step(.055),
+  noteGap: .25, noteAccent: .5, ...envFor(.5, 0, .06), delayMix: echo, delayTime: U.delay(.09), delayFb: .39});
+const arcSparkle = () => Object.assign(arcCoin('E6:2.4 Eb6 G6 Bb6 Eb7 G7', .45), {noteLen: U.step(.045), delayFb: .5, revMix: .15, revSize: .4, ...envFor(.4, 0, .06)});
+const arcKick = () => SP({wave: 2, base: U.base(140), ramp: -.28, punch: .6, ...envFor(.2, 0, .18)});
+// ---- Botanical Circuit ----
+const botFwip = (d = .16) => SP({wave: 2, base: U.base(180), ramp: .27 * Math.cbrt(.16 / d), dramp: .3, punch: .5, hpf: U.hpf(60), ...envFor(d, .003, .05)});
+const botVine = () => SP({wave: 0, duty: .99, base: U.base(55), vibDepth: .5, vibSpeed: U.vib(1.3), hpf: U.hpf(150),
+  ringMix: .5, ringFreq: U.ringF(380), ringDecay: U.ringT(.15), ringSpread: .35, ...envFor(.72, .3, .4)});
+const botBoot = () => SP({wave: 0, duty: .5, base: U.base(523.25), notes: 'C5 Bb5 F5 C6 G5 Eb6 D6 G6 G6:3', noteLen: U.step(.045),
+  noteGap: .33, noteAccent: .5, ...envFor(.52, 0, .08)});
+const botBootRise = () => SP({wave: 0, base: U.base(110), ramp: .199, lpf: U.lpf(2500), ...envFor(.42, .4, .02)});
+// ---- Midnight Meltdown ----
+const midDrone = (d = 2.4, hz = 58.27) => SP({wave: 1, base: U.base(hz), uniMix: 1, uniDetune: .65, octMix: .7, lpf: U.lpf(200), lpfRamp: .053, lpfBend: .1, lpfRes: .6, ...envFor(d, .35, .4)});
+const midServo = (f0 = 420, f1 = 980, d = .35) => SP({wave: 1, base: U.base(f0), ramp: Math.sign(f1 - f0) * Math.cbrt(Math.abs(Math.log(f1 / f0)) / (d * SR) * 100),
+  vibDepth: .07, vibSpeed: U.vib(31), hpf: U.hpf(300), lpf: U.lpf(3500), ...envFor(d, .02, .06)});
+const midClank = (d = .45) => SP({wave: 3, base: .5, punch: .8, hpf: U.hpf(1500), ringMix: .75, ringFreq: U.ringF(523), ringDecay: U.ringT(.5 * d / .45), ringSpread: .85, drive: .25, ...envFor(.035, 0, .03)});
+const midStomp = () => SP({wave: 2, base: U.base(120), ramp: -.25, punch: .6, drive: .25, ...envFor(.3, 0, .28)});
+const midSurge = (d = .9) => SP({wave: 1, base: U.base(116.54), ramp: Math.cbrt(Math.log(2) / (d * SR) * 100), octMix: .8, lpf: U.lpf(200), lpfRamp: .2 * .9 / d, lpfBend: -.25, lpfRes: .7, ...envFor(d, d * .92, .05)});
+const midSurgeNoise = (d = .9) => Object.assign(midSurge(d), {wave: 3, base: .5, ramp: 0, octMix: 0});
+// ---- Field Guide ----
+const fldFlip = () => SP({wave: 3, base: .5, notes: 'r -7:2 -4:2 0:1.5 3:2', noteLen: U.step(.03), noteAccent: .7,
+  lpf: U.lpf(1500), lpfRamp: .357, lpfRes: .3, hpf: U.hpf(500), ...envFor(.3, .17, .1)});
+const fldPencil = (d = .55) => SP({wave: 3, base: .5, notes: '0 -2 0 -2 0 -2 0', noteLen: U.step(.09), noteGap: .4, noteAccent: .3,
+  hpf: U.hpf(2200), lpf: U.lpf(7000), ...envFor(d, .05, .18)});
+// ---- Full stings: main voice = the branch horn; other layers ride along (Python timings/gains) ----
+const sting = (horn, at, rev, layers) => Object.assign(horn, {revMix: 0, stack: {at, gain: 1, revSize: rev[0], revMix: rev[1], layers: layers.map(([params, a, g]) => ({params, at: a, gain: g}))}});
+const SID = [
+  ['arcade-impact-sting', 'Arcade', 'arcade-impact-sting', () => sting(hornP('arcade'), 1.0, [.3, .12],
+    [[arcPowerup(), 0, .4], [arcCoin(), .42, .55], [arcKick(), 1.0, .6], [arcSparkle(), 2.02, .3]]), 'Full stings'],
+  ['botanical-circuit-sting', 'Botanical', 'botanical-circuit-sting', () => sting(hornP('botanical'), 1.45, [.4, .16],
+    [[botFwip(), 0, .7], [botVine(), .18, .55], [botBoot(), .9, .45], [botBootRise(), .9, .14], [botFwip(.1), 1.71, .25]]), 'Full stings'],
+  ['midnight-meltdown-sting', 'Meltdown', 'midnight-meltdown-sting', () => sting(hornP('midnight'), 1.95, [.6, .2],
+    [[midDrone(), 0, .55], [midDrone(2.4, 58.27 * 2 * Math.SQRT2), 0, .15], [midServo(420, 980, .32), .45, .3], [midClank(.5), .78, .5], [midStomp(), .78, .6],
+     [midServo(900, 380, .25), 1.0, .2], [midClank(.4), 1.12, .32], [midStomp(), 1.12, .38], [midSurge(.75), 1.2, .55], [midSurgeNoise(.75), 1.2, .2]]), 'Full stings'],
+  ['field-guide-sting', 'Field Guide', 'field-guide-sting', () => sting(hornP('field'), 1.6, [.55, .22],
+    [[fldFlip(), 0, .55], [fldFlip(), .38, .6], [fldPencil(.6), .85, .35]]), 'Full stings'],
+  ...['chip', 'brass', 'grit', 'soft', 'kazoo', 'stack'].flatMap(t => [1, 2, 3].map(c =>
+    [`horn-${t}-${c}`, `${t[0].toUpperCase() + t.slice(1)} ${c}`, `horn-${t}-${c}`, () => hornP(t, c), 'Horn family'])),
+  ['arcade-powerup', 'Power-up', 'arcade-powerup', arcPowerup, 'Arcade Impact'],
+  ['arcade-coin', 'Coin', 'arcade-coin', () => arcCoin(), 'Arcade Impact'],
+  ['arcade-horn', 'Horn', 'arcade-horn', () => hornP('arcade'), 'Arcade Impact'],
+  ['arcade-kick', 'Sub-kick', 'arcade-kick', arcKick, 'Arcade Impact'],
+  ['arcade-sparkle', 'Sparkle', 'arcade-sparkle', arcSparkle, 'Arcade Impact'],
+  ['botanical-seed-pop', 'Seed pop', 'botanical-seed-pop', () => botFwip(), 'Botanical Circuit'],
+  ['botanical-vine-creak', 'Vine creak', 'botanical-vine-creak', botVine, 'Botanical Circuit'],
+  ['botanical-boot-blips', 'Boot blips', 'botanical-boot-blips', () => Object.assign(botBoot(), {stack: {at: 0, gain: 1, revSize: .2, revMix: 0, layers: [{params: botBootRise(), at: 0, gain: .3}]}}), 'Botanical Circuit'],
+  ['botanical-horn', 'Horn', 'botanical-horn', () => hornP('botanical'), 'Botanical Circuit'],
+  ['botanical-tiny-fwip', 'Tiny fwip', 'botanical-tiny-fwip', () => botFwip(.1), 'Botanical Circuit'],
+  ['meltdown-drone', 'Drone', 'meltdown-drone', () => Object.assign(midDrone(), {stack: {at: 0, gain: 1, revSize: .3, revMix: 0, layers: [{params: midDrone(2.4, 58.27 * 2 * Math.SQRT2), at: 0, gain: .28}]}}), 'Midnight Meltdown'],
+  ['meltdown-servo-up', 'Servo up', 'meltdown-servo-up', () => midServo(), 'Midnight Meltdown'],
+  ['meltdown-servo-down', 'Servo down', 'meltdown-servo-down', () => midServo(900, 380, .25), 'Midnight Meltdown'],
+  ['meltdown-clank', 'Clank', 'meltdown-clank', () => Object.assign(midClank(), {stack: {at: 0, gain: .8, revSize: .3, revMix: .08, layers: [{params: midStomp(), at: 0, gain: 1}]}}), 'Midnight Meltdown'],
+  ['meltdown-stomp', 'Stomp', 'meltdown-stomp', midStomp, 'Midnight Meltdown'],
+  ['meltdown-surge', 'Surge', 'meltdown-surge', () => Object.assign(midSurge(), {stack: {at: 0, gain: 1, revSize: .3, revMix: 0, layers: [{params: midSurgeNoise(), at: 0, gain: .35}]}}), 'Midnight Meltdown'],
+  ['meltdown-horn', 'Horn', 'meltdown-horn', () => hornP('midnight'), 'Midnight Meltdown'],
+  ['field-page-flip', 'Page flip', 'field-page-flip', fldFlip, 'Field Guide'],
+  ['field-pencil', 'Pencil', 'field-pencil', () => fldPencil(), 'Field Guide'],
+  ['field-horn', 'Horn', 'field-horn', () => hornP('field'), 'Field Guide'],
+];
 const PRESETS = {};
-[['Sci-Fi', SCIFI], ['Retro', RETRO], ['Movement', MOVE], ['Impacts', IMPACT]].forEach(([group, list]) => list.forEach(([id, label, name, fn]) => { PRESETS[id] = {id, label, name, group, fn}; }));
+[['Sci-Fi', SCIFI], ['Retro', RETRO], ['Movement', MOVE], ['Impacts', IMPACT], ['Sound Identity', SID]].forEach(([group, list]) => list.forEach(([id, label, name, fn, sub]) => { PRESETS[id] = {id, label, name, group, fn, sub}; }));
 function generate(id){ return sanitize(PRESETS[id].fn()); }
 
 function randomize(){
@@ -520,23 +679,27 @@ function randomize(){
   return sanitize(p);
 }
 const RING_KEYS = new Set(['ringMix', 'ringFreq', 'ringDecay', 'ringSpread']);
+const NOTE_KEYS = new Set(['noteLen', 'noteGap', 'scoop', 'noteAccent']), LAYER_MIX = new Set(['uniMix', 'octMix', 'subMix']);
 function mutate(src){
   const p = {...src};
-  for (const k in DEFAULTS){ if (k === 'wave' || k === 'vol' || k === 'loop') continue; if (RING_KEYS.has(k) && !src.ringMix) continue; if (rnd(1)) p[k] += frnd(.1) - .05; }
+  for (const k in DEFAULTS){ if (k === 'wave' || k === 'vol' || k === 'loop') continue; if (RING_KEYS.has(k) && !src.ringMix) continue;
+    if ((NOTE_KEYS.has(k) && !src.notes) || (LAYER_MIX.has(k) && !src[k]) || (k === 'uniDetune' && !src.uniMix)) continue; if (rnd(1)) p[k] += frnd(.1) - .05; }
   return sanitize(p);
 }
 
 /* ---------- Synth core (sfxr-style, 8x supersampling) + FX chain ---------- */
 function synth(input){
-  const p = sanitize(input), LM = lenMul(p.length);
+  const p = sanitize(input); if (p.stack) return synthStack(p);
+  const LM = lenMul(p.length);
   const MAX = SR * 12, out = new Float32Array(MAX);
   let phase = 0, fperiod, fmaxperiod, fslide, fdslide, period, squareDuty, squareSlide, arpMod, arpTime, arpLimit;
   let fltp, fltdp, fltw, fltwD, fltwDD, fltdmp, fltphp, flthp, flthpD, vibPhase, vibSpeed, vibAmp;
   let envVol = 0, envStage, envTime, envLen, fphase, fdphase, iphase, ipp, repTime, repLimit;
   const phaser = new Float32Array(1024), noise = new Float32Array(32);
+  let notePer = 0;                       // current note's period (Notes); 0 = use Start frequency
   function reset(restart){
     if (!restart) phase = 0;
-    fperiod = 100 / (p.base * p.base + .001); period = fperiod | 0;
+    fperiod = notePer > 0 ? notePer : 100 / (p.base * p.base + .001); period = fperiod | 0;
     fmaxperiod = 100 / (p.limit * p.limit + .001);
     fslide = 1 - Math.pow(p.ramp, 3) * .01; fdslide = -Math.pow(p.dramp, 3) * 1e-6;
     squareDuty = .5 - p.duty * .5; squareSlide = -p.dutyRamp * 5e-5;
@@ -559,14 +722,42 @@ function synth(input){
   }
   reset(false);
   const S = p.susLevel;
+  // Notes: step through the sequence, each note re-pitches the voice (with optional scoop, accent and gap); last note holds.
+  const seq = p.notes ? parseNotes(p.notes, 100 / (p.base * p.base + .001)) : null, last = seq ? seq.length - 1 : -1;
+  const stepN = Math.max(1, Math.round(noteSec(p.noteLen) * LM * SR)), edgeN = Math.round(.003 * SR), fadeN = Math.max(edgeN, envLen[0]);
+  const scoopSt = p.scoop * 6, scoopN = .04 * SR, accN = .3 * stepN;
+  let seqI = 0, seqT = 0, seqEnd = Infinity, seqOn = Infinity;
+  function startNote(i){
+    seqI = i; seqT = 0; const nt = seq[i];
+    seqEnd = i < last ? Math.max(1, Math.round(nt.steps * stepN)) : Infinity;
+    seqOn = i < last && p.noteGap > 0 ? Math.min(seqEnd, Math.max(2 * edgeN, Math.round(seqEnd * (1 - p.noteGap)))) : Infinity;
+    if (nt.per > 0){ notePer = nt.per; reset(true); }
+  }
+  if (seq && seq.length) startNote(0);
+  // Layers: extra oscillators that follow the main pitch (unison detuned copy, octave up, triangle sub-octave).
+  const uniR = Math.pow(2, 50 * p.uniDetune * p.uniDetune / 1200), tonal = p.wave !== 3;
+  const layU = tonal && p.uniMix > 0, layO = tonal && p.octMix > 0, layS = p.subMix > 0;
+  let phU = 0, phO = 0, phS = 0;
+  const wv = fp => p.wave === 0 ? (fp < squareDuty ? .5 : -.5) : p.wave === 1 ? 1 - fp * 2 : p.wave === 2 ? Math.sin(fp * 2 * Math.PI) : 4 * Math.abs(fp - .5) - 1;
   let n = 0;
   for (; n < MAX; n++){
+    let g = 1, sc = 1;
+    if (seq && seq.length){
+      if (++seqT >= seqEnd) startNote(seqI + 1);
+      if (!(seq[seqI].per > 0)) g = 0;
+      else {
+        if (p.noteAccent > 0) g = 1 - p.noteAccent * (1 - Math.exp(-seqT / accN));
+        if (seqI > 0 && p.noteGap > 0 && seqT < fadeN) g *= seqT / fadeN;
+        if (seqT > seqOn - edgeN) g *= Math.max(0, (seqOn - seqT) / edgeN);
+        if (scoopSt > 0) sc = Math.pow(2, scoopSt * Math.exp(-seqT / scoopN) / 12);
+      }
+    }
     if (repLimit !== 0 && ++repTime >= repLimit){ repTime = 0; reset(true); }
     if (arpLimit !== 0 && ++arpTime >= arpLimit){ arpLimit = 0; fperiod *= arpMod; }
     fslide += fdslide; fperiod *= fslide;
     if (fperiod > fmaxperiod){ fperiod = fmaxperiod; if (p.limit > 0) break; }
-    let rfperiod = fperiod;
-    if (vibAmp > 0){ vibPhase += vibSpeed; rfperiod = fperiod * (1 + Math.sin(vibPhase) * vibAmp); }
+    let rfperiod = fperiod * sc;
+    if (vibAmp > 0){ vibPhase += vibSpeed; rfperiod = fperiod * sc * (1 + Math.sin(vibPhase) * vibAmp); }
     period = Math.max(8, rfperiod | 0);
     squareDuty = clamp(squareDuty + squareSlide, 0, .5);
     if (++envTime > envLen[envStage]){ envTime = 0; if (++envStage === 4) break; }
@@ -584,8 +775,12 @@ function synth(input){
         case 0: s = fp < squareDuty ? .5 : -.5; break;
         case 1: s = 1 - fp * 2; break;
         case 2: s = Math.sin(fp * 2 * Math.PI); break;
+        case 4: s = 4 * Math.abs(fp - .5) - 1; break;
         default: s = noise[(phase * 32 / period) | 0];
       }
+      if (layU){ phU += uniR / period; phU -= phU | 0; s += p.uniMix * wv(phU); }
+      if (layO){ phO += 2 / period; phO -= phO | 0; s += p.octMix * wv(phO); }
+      if (layS){ phS += .5 / period; phS -= phS | 0; s += p.subMix * (4 * Math.abs(phS - .5) - 1); }
       const pp = fltp; fltw = clamp(fltw * fltwD, 0, .1);
       if (p.lpf !== 1){ fltdp += (s - fltp) * fltw; fltdp -= fltdp * fltdmp; } else { fltp = s; fltdp = 0; }
       fltp += fltdp;
@@ -593,11 +788,21 @@ function synth(input){
       phaser[ipp & 1023] = s; s += phaser[(ipp - iphase + 1024) & 1023]; ipp = (ipp + 1) & 1023;
       ss += s * envVol;
     }
-    out[n] = ss / 8;
+    out[n] = g === 1 ? ss / 8 : ss / 8 * g;
   }
   let x = out.slice(0, Math.max(2, n));
   if (p.loop) x = loopCrossfade(x);
   return postFX(x, p);
+}
+// Stack: the main voice plus extra layers (each its own full sound) at time offsets, mixed then given a shared reverb.
+// Used by the full Mr. Horns stings: the sliders edit the main voice (the horn); the other layers ride along.
+function synthStack(p){
+  const st = p.stack, lead = {...p}; delete lead.stack;
+  const parts = [[synth(lead), st.at, st.gain], ...st.layers.map(l => [synth(l.params), l.at, l.gain])];
+  let L = 2; for (const [x, at] of parts) L = Math.max(L, Math.round(at * SR) + x.length); L = Math.min(L, SR * 14);
+  const mix = new Float32Array(L);
+  for (const [x, at, g] of parts){ const pk = peakOf(x) || 1, o = Math.round(at * SR); for (let i = 0; i < x.length && o + i < L; i++) mix[o + i] += x[i] / pk * g; }
+  return postFX(mix, sanitize({vol: p.vol, revSize: st.revSize, revMix: st.revMix}));
 }
 function peakOf(x){ let m = 0; for (let i = 0; i < x.length; i++){ const a = Math.abs(x[i]); if (a > m) m = a; } return m; }
 function scale(x, g){ for (let i = 0; i < x.length; i++) x[i] *= g; }
@@ -864,7 +1069,7 @@ function renderLib(){
     const row = document.createElement('div'); row.className = 'lib-row' + (e.id === currentId ? ' cur' : '');
     const pre = e.preset && PRESETS[e.preset] ? PRESETS[e.preset].name : 'Custom';
     row.innerHTML = `<button class="star" aria-pressed="${e.starred}" aria-label="Star">${e.starred ? '★' : '☆'}</button>
-      <button class="lib-name"><b></b><small>${pre} · ${WAVES[e.params.wave]}${e.params.loop ? ' · loop' : ''} · ${fmtTime(e.created)}</small></button>
+      <button class="lib-name"><b></b><small>${pre} · ${WAVES[e.params.wave]}${e.params.notes ? ' · ♪' : ''}${e.params.stack ? ' · stack' : ''}${e.params.loop ? ' · loop' : ''} · ${fmtTime(e.created)}</small></button>
       <button class="ren" aria-label="Rename">✎</button><button class="js" aria-label="Save params as JSON">⤓</button><button class="del" aria-label="Delete">🗑</button>`;
     row.querySelector('b').textContent = e.name;
     row.querySelector('.lib-name').onclick = () => recall(e);
@@ -902,7 +1107,7 @@ function setAll(p, name, opts = {}){
   if (currentPreset) $('batchPreset').value = currentPreset;
   syncUI(); render(); persist(); renderLib(); play();
 }
-function genPreset(id){ setAll(generate(id), nextName(PRESETS[id].name), {preset: id}); }
+function genPreset(id){ setAll(generate(id), PRESETS[id].sub ? PRESETS[id].name : nextName(PRESETS[id].name), {preset: id}); }
 function doRandom(){ setAll(randomize(), nextName('Random'), {preset: null}); }
 function doMutate(){ setAll(mutate(P), soundName.endsWith('*') ? soundName : soundName + '*', {preset: currentPreset}); }
 function saveToLib(){
@@ -914,15 +1119,21 @@ function saveToLib(){
 /* ---------- Build controls ---------- */
 const groups = {'Sci-Fi': $('presets-scifi'), 'Retro': $('presets-retro'), 'Movement': $('presets-move'), 'Impacts': $('presets-impact')};
 const bp = $('batchPreset');
-const og = {'Sci-Fi': document.createElement('optgroup'), 'Retro': document.createElement('optgroup'), 'Movement': document.createElement('optgroup'), 'Impacts': document.createElement('optgroup')};
-og['Sci-Fi'].label = 'Sci-Fi'; og['Retro'].label = 'Retro'; og['Movement'].label = 'Movement'; og['Impacts'].label = 'Impacts';
-for (const id in PRESETS){
-  const pr = PRESETS[id], b = document.createElement('button');
-  b.className = 'btn'; b.textContent = pr.label; b.setAttribute('aria-label', pr.name); b.onclick = () => genPreset(id);
-  groups[pr.group].appendChild(b);
-  const o = document.createElement('option'); o.value = id; o.textContent = pr.name; og[pr.group].appendChild(o);
+const og = {};
+const SID_OPEN = new Set(['Full stings', 'Horn family']), SID_SUB = {'Full stings': 'the 4 logos', 'Horn family': '1 · 2 · 3 notes'};
+function sidGrid(sub){
+  const d = document.createElement('details'); d.className = 'sub'; d.open = SID_OPEN.has(sub) || matchMedia('(min-width:900px)').matches;
+  d.innerHTML = `<summary>${sub} <small>${SID_SUB[sub] || ''}</small></summary><div class="grid"></div>`;
+  $('presets-sid').appendChild(d); return groups['SID:' + sub] = d.querySelector('.grid');
 }
-bp.append(og['Sci-Fi'], og['Retro'], og['Movement'], og['Impacts']);
+for (const id in PRESETS){
+  const pr = PRESETS[id], b = document.createElement('button'), key = pr.sub ? 'SID:' + pr.sub : pr.group;
+  b.className = pr.sub ? 'btn sid' : 'btn'; b.textContent = pr.label; b.setAttribute('aria-label', pr.name); b.onclick = () => genPreset(id);
+  (groups[key] || sidGrid(pr.sub)).appendChild(b);
+  if (!og[key]){ og[key] = document.createElement('optgroup'); og[key].label = pr.sub ? 'Sound Identity · ' + pr.sub : pr.group; }
+  const o = document.createElement('option'); o.value = id; o.textContent = pr.name; og[key].appendChild(o);
+}
+bp.append(...Object.values(og));
 { const o = document.createElement('option'); o.value = '__mutate'; o.textContent = 'Mutations of current sound'; bp.appendChild(o); }
 if (currentPreset && PRESETS[currentPreset]) bp.value = currentPreset;
 $('randomBtn').onclick = doRandom; $('mutateBtn').onclick = doMutate; $('saveLibBtn').onclick = saveToLib;
@@ -950,12 +1161,23 @@ SECTIONS.forEach(([title, sub, params], si) => {
     row.querySelector('.reset').onclick = () => { pushUndo(); P[key] = DEFAULTS[key]; syncUI(); render(); persist(); if ($('autoplay').checked) play(); };
     inputs[key] = {inp, kind}; body.appendChild(row);
   });
+  if (title === 'Notes'){
+    const row = document.createElement('div'); row.className = 'row';
+    row.innerHTML = `<label for="notesInp">Note sequence</label>
+      <input type="text" class="notes-inp" id="notesInp" placeholder="off · e.g. Bb3 Eb4" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <p class="note">Notes (Bb3, F#5) or semitones from Start freq (0 5 7); r = rest; :2 = 2 steps. Last note holds. Empty = off.</p>`;
+    body.prepend(row);
+    const ni = row.querySelector('input');
+    ni.addEventListener('change', () => { const v = cleanNotes(ni.value); if (v === (P.notes || '')){ ni.value = v; return; }
+      pushUndo(); if (v) P.notes = v; else delete P.notes; syncUI(); render(); persist(); if ($('autoplay').checked) play(); });
+    ni.addEventListener('keydown', e => { if (e.key === 'Enter') ni.blur(); });
+  }
   if (title === 'Output'){
     const row = document.createElement('div'); row.className = 'row';
     row.innerHTML = `<label class="toggle" style="display:flex"><input type="checkbox" id="loopChk"> Loop-friendly (seamless loop + WAV loop points)</label>`;
     body.appendChild(row);
   }
-  secs.push({el: d, keys: params.map(p => p[0])});
+  secs.push({el: d, keys: params.map(p => p[0]), notes: title === 'Notes'});
   $('sliders').appendChild(d);
 });
 $('loopChk').addEventListener('change', e => { pushUndo(); P.loop = e.target.checked ? 1 : 0; if (!P.loop) stop(); syncUI(); render(); persist(); play(); });
@@ -963,11 +1185,14 @@ function paint(inp, key, kind){
   const min = +inp.min, pct = (inp.value - min) / (1 - min) * 100; inp.style.setProperty('--p', pct + '%');
   $('o_' + key).textContent = fmt(key, +inp.value, kind);
 }
-function markSecs(){ secs.forEach(s => s.el.classList.toggle('active', s.keys.some(k => Math.abs(P[k] - DEFAULTS[k]) > 1e-3))); }
+function markSecs(){ secs.forEach(s => s.el.classList.toggle('active', s.notes ? !!P.notes : s.keys.some(k => Math.abs(P[k] - DEFAULTS[k]) > 1e-3))); }
 function syncUI(){
   for (const k in inputs){ inputs[k].inp.value = P[k]; paint(inputs[k].inp, k, inputs[k].kind); }
   document.querySelectorAll('#waves button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.w === P.wave)));
   document.querySelectorAll('.row[data-key="duty"],.row[data-key="dutyRamp"]').forEach(r => r.classList.toggle('dim', P.wave !== 0));
+  ['noteLen', 'noteGap', 'scoop', 'noteAccent'].forEach(k => document.querySelector(`.row[data-key="${k}"]`).classList.toggle('dim', !P.notes));
+  ['uniMix', 'uniDetune', 'octMix'].forEach(k => document.querySelector(`.row[data-key="${k}"]`).classList.toggle('dim', P.wave === 3));
+  if (document.activeElement !== $('notesInp')) $('notesInp').value = P.notes || '';
   $('loopChk').checked = !!P.loop; markSecs(); updatePlayBtn();
 }
 
@@ -1026,7 +1251,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'm') doMutate();
   else if (k === 's'){ e.preventDefault(); saveToLib(); }
   else if (k === 'z') undo();
-  else if (k === 'w'){ pushUndo(); P.wave = (P.wave + 1) % 4; syncUI(); render(); persist(); play(); }
+  else if (k === 'w'){ pushUndo(); P.wave = (P.wave + 1) % WAVES.length; syncUI(); render(); persist(); play(); }
   else if (/^[0-9]$/.test(k)){ const id = sciIds[(+k + 9) % 10]; if (id) genPreset(id); }
 });
 
